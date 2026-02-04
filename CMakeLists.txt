@@ -41,12 +41,5 @@ target_link_libraries(engine PUBLIC
     glfw
     glm::glm
     assimp::assimp
-)
-
-# ---------- EXECUTABLE ----------
-add_executable(app Main.cpp)
-
-target_link_libraries(app PRIVATE
-    engine
     imgui::imgui
 )
