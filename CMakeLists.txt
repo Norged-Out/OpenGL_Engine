@@ -22,10 +22,14 @@ target_include_directories(glad PUBLIC
 # ---------- ENGINE ----------
 add_library(engine
     engine/src/Camera.cpp
+    engine/src/Cubemap.cpp
     engine/src/EBO.cpp
+    engine/src/HDRConverter.cpp
+    engine/src/HDRTexture.cpp
     engine/src/Mesh.cpp
     engine/src/Model.cpp
     engine/src/Shader.cpp
+    engine/src/Skybox.cpp
     engine/src/Texture.cpp
     engine/src/VAO.cpp
     engine/src/VBO.cpp
@@ -42,4 +46,9 @@ target_link_libraries(engine PUBLIC
     glm::glm
     assimp::assimp
     imgui::imgui
+)
+
+# ---- for HDRI to cubemap conversion ----
+target_compile_definitions(engine PUBLIC
+    ENGINE_SHADER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/assets/shaders/"
 )
