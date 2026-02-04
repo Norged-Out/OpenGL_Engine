@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>     // glm::mat4 support
 #include <unordered_map>   // cache
 
-std::string get_file_contents(const char* filename);
+std::string get_file_contents(const std::string& filename);
 
 class Shader {
 public:

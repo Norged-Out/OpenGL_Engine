@@ -5,7 +5,8 @@
 #include <cerrno>
 
 // Reads a text file and outputs a string with everything in the text file
-std::string get_file_contents(const char* filename) {
+std::string get_file_contents(const std::string& filename) {
+	std::cout << "Loading shader: " << filename << std::endl;
 	std::ifstream in(filename, std::ios::binary);
 	if (in)	{
 		std::string contents;
@@ -16,14 +17,14 @@ std::string get_file_contents(const char* filename) {
 		in.close();
 		return(contents);
 	}
-	throw(errno);
+	throw(std::runtime_error("Failed to open file: " + filename));
 }
 
 // Constructor that build the Shader Program from 2 different shaders
 Shader::Shader(const std::string& vertexFile, const std::string& fragmentFile) {
 	// Read vertexFile and fragmentFile and store the strings
-	std::string vertexCode = get_file_contents(vertexFile.c_str());
-	std::string fragmentCode = get_file_contents(fragmentFile.c_str());
+	std::string vertexCode = get_file_contents(vertexFile);
+	std::string fragmentCode = get_file_contents(fragmentFile);
 
 	// Convert the shader source strings into character arrays
 	const char* vertexSource = vertexCode.c_str();
