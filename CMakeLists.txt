@@ -33,6 +33,7 @@ add_library(engine
     engine/src/Texture.cpp
     engine/src/VAO.cpp
     engine/src/VBO.cpp
+    third_party/stb/stb_image.cpp
 )
 
 target_include_directories(engine PUBLIC
