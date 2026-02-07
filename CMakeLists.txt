@@ -10,10 +10,7 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 
-#add_subdirectory(third_party/glfw)
-
-# ---------- FIND PACKAGES ----------
-find_package(assimp CONFIG REQUIRED)
+add_subdirectory(third_party/glfw)
 
 # ---------- GLAD ----------
 add_library(glad
@@ -22,6 +19,13 @@ add_library(glad
 
 target_include_directories(glad PUBLIC
     third_party/glad/include
+)
+
+# ---------- STB ----------
+add_library(stb INTERFACE)
+
+target_include_directories(stb INTERFACE
+    third_party/stb
 )
 
 # ---------- GLM ----------
@@ -95,12 +99,12 @@ add_library(engine
 
 target_include_directories(engine PUBLIC
     engine/include
-    #${CMAKE_BINARY_DIR}/vcpkg_installed/x64-windows/include
 )
 
 target_link_libraries(engine PUBLIC
     glad
     glfw
+    stb
     glm::glm
     assimp::assimp
     imgui::imgui
