@@ -5,10 +5,9 @@
   "dependencies": [
     "glfw3",
     "glm",
-    "assimp",
     {
-      "name": "imgui",
-      "features": [ "glfw-binding", "opengl3-binding" ]
+      "name": "assimp",
+      "features": [ "obj", "fbx", "gltf" ]
     }
   ]
 }

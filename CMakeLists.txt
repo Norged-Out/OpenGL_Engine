@@ -8,7 +8,6 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
-find_package(imgui CONFIG REQUIRED)
 
 # ---------- GLAD ----------
 add_library(glad
@@ -17,6 +16,26 @@ add_library(glad
 
 target_include_directories(glad PUBLIC
     third_party/glad/include
+)
+
+# ---------- IMGUI ----------
+add_library(imgui
+    third_party/imgui/src/imgui.cpp
+    third_party/imgui/src/imgui_draw.cpp
+    third_party/imgui/src/imgui_tables.cpp
+    third_party/imgui/src/imgui_widgets.cpp
+    third_party/imgui/src/imgui_impl_glfw.cpp
+    third_party/imgui/src/imgui_impl_opengl3.cpp
+)
+
+add_library(imgui::imgui ALIAS imgui)
+
+target_include_directories(imgui PUBLIC
+    third_party/imgui/include
+)
+
+target_link_libraries(imgui PUBLIC
+    glfw
 )
 
 # ---------- ENGINE ----------
