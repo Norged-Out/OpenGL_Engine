@@ -87,6 +87,7 @@ add_library(engine
     engine/src/EBO.cpp
     engine/src/HDRConverter.cpp
     engine/src/HDRTexture.cpp
+    engine/src/MathUtils.cpp
     engine/src/Mesh.cpp
     engine/src/Model.cpp
     engine/src/Shader.cpp

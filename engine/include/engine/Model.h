@@ -10,6 +10,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp> 
 #include "engine/Mesh.h"
+#include "engine/MathUtils.h"
 class Shader;
 
 class Model
@@ -18,7 +19,6 @@ public:
     // constructors
     explicit Model(const std::string& path);
     Model(const std::string& path, const std::vector<std::string>& skipNames);
-    Model(const std::string& path, const std::string& diffusePath, const std::string& specularPath);
 
     // Prevent copying
     Model(const Model&) = delete;
@@ -26,8 +26,14 @@ public:
 
     // simple setters for TRS
     void setPosition(const glm::vec3& pos);
-    void setRotation(float angleDeg, const glm::vec3& axis);
+    void setRotation(float angleDeg, const glm::vec3& axis); // axis-angle
     void setScale(const glm::vec3& s);
+
+    // additional usage for Rotation
+    void setRotationQuat(const glm::quat& q);
+    void setRotationEuler(float pitchDeg, float yawDeg, float rollDeg,
+                      RotationOrder order = RotationOrder::YXZ);
+    glm::quat getRotationQuat() const;
 
 	glm::mat4 getModelMatrix() const {
         return glm::translate(glm::mat4(1.0f), position)
@@ -60,8 +66,6 @@ private:
     std::string directory;
     std::string texturesDir;
     std::vector<std::shared_ptr<Mesh>> meshes;
-    std::string diffusePath;
-    std::string specularPath;
 
     // Skip some unwanted meshes
     std::vector<std::string> meshNameSkips;

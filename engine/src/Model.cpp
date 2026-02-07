@@ -38,8 +38,6 @@ static std::string findFirstMatchingTexture(
     return "";
 }
 
-
-
 // helper to extract model path
 static std::string getModelDirectory(const std::string& modelPath) {
     size_t lastSlash = modelPath.find_last_of("/\\");
@@ -48,8 +46,6 @@ static std::string getModelDirectory(const std::string& modelPath) {
     }
     return "";  // Model in current directory
 }
-
-
 
 // Constructor to load model
 Model::Model(const std::string& path) {
@@ -62,15 +58,6 @@ Model::Model(const std::string& path, const std::vector<std::string>& skipNames)
     loadModel(path);
 }
 
-// alt Constructor to force diffuse/specular textures
-Model::Model(const std::string& path,
-    const std::string& diffusePath,
-    const std::string& specularPath)
-    : diffusePath(diffusePath), specularPath(specularPath) {
-    loadModel(path);
-}
-
-
 void Model::setPosition(const glm::vec3& pos) { position = pos; }
 
 void Model::setRotation(float angleDeg, const glm::vec3& axis) {
@@ -79,6 +66,18 @@ void Model::setRotation(float angleDeg, const glm::vec3& axis) {
 
 void Model::setScale(const glm::vec3& s) { scale = s; }
 
+// Quaternion handling
+void Model::setRotationQuat(const glm::quat& q) {
+    rotation = glm::normalize(q);
+}
+
+glm::quat Model::getRotationQuat() const {
+    return rotation;
+}
+
+void Model::setRotationEuler(float pitchDeg, float yawDeg, float rollDeg, RotationOrder order) {
+    rotation = glm::normalize(MathUtils::eulerToQuat(pitchDeg, yawDeg, rollDeg, order));
+}
 
 void Model::Draw(Shader& shader) {
     if (meshes.empty()) return; // guard
