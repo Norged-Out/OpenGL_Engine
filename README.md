@@ -167,6 +167,8 @@ No package manager or toolchain file is required.
 - This engine does not provide a default application entry point
 - This engine is not optimized for distribution
 
+---
+
 ## License
 
 Personal/educational use.
