@@ -10,7 +10,7 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 
-add_subdirectory(third_party/glfw)
+#add_subdirectory(third_party/glfw)
 
 # ---------- FIND PACKAGES ----------
 find_package(assimp CONFIG REQUIRED)
@@ -31,6 +31,30 @@ add_library(glm::glm ALIAS glm)
 target_include_directories(glm INTERFACE
     third_party/glm
 )
+
+# ---------- ASSIMP ----------
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
+
+# static library
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+
+# importers: start from nothing
+set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
+
+# enable only what you want
+set(ASSIMP_BUILD_OBJ_IMPORTER ON CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_FBX_IMPORTER ON CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_GLTF_IMPORTER ON CACHE BOOL "" FORCE)
+
+# kill common bloat
+set(ASSIMP_ENABLE_DRACO OFF CACHE BOOL "" FORCE)
+set(ASSIMP_ENABLE_ZLIB OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(third_party/assimp)
 
 # ---------- IMGUI ----------
 add_library(imgui
@@ -71,7 +95,7 @@ add_library(engine
 
 target_include_directories(engine PUBLIC
     engine/include
-    ${CMAKE_BINARY_DIR}/vcpkg_installed/x64-windows/include
+    #${CMAKE_BINARY_DIR}/vcpkg_installed/x64-windows/include
 )
 
 target_link_libraries(engine PUBLIC
