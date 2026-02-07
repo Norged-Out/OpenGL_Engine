@@ -5,10 +5,6 @@
   "dependencies": [
     "glfw3",
     "glm",
-    {
-      "name": "assimp",
-      "default-features": false,
-      "features": [ "obj", "fbx", "gltf" ]
-    }
+    "assimp"
   ]
 }
