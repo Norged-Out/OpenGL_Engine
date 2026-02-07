@@ -13,7 +13,6 @@ set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 add_subdirectory(third_party/glfw)
 
 # ---------- FIND PACKAGES ----------
-find_package(glm CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
 
 # ---------- GLAD ----------
@@ -23,6 +22,14 @@ add_library(glad
 
 target_include_directories(glad PUBLIC
     third_party/glad/include
+)
+
+# ---------- GLM ----------
+add_library(glm INTERFACE)
+add_library(glm::glm ALIAS glm)
+
+target_include_directories(glm INTERFACE
+    third_party/glm
 )
 
 # ---------- IMGUI ----------
