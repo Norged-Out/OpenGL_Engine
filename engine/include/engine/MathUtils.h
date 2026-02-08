@@ -25,4 +25,13 @@ public:
 
     // Smooth time remapping (smoothstep)
     static float easeInOut(float t);
+
+    // Catmull-Rom spline interpolation
+    static glm::vec3 catmullRom(
+        const glm::vec3& p0,
+        const glm::vec3& p1,
+        const glm::vec3& p2,
+        const glm::vec3& p3,
+        float t
+    );
 };
