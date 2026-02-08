@@ -48,7 +48,7 @@ float MathUtils::easeInOut(float t) {
     - passes THROUGH p1 when t = 0
     - passes THROUGH p2 when t = 1
     - uses p0 and p3 to infer tangents automatically
-    - guarantees C¹ continuity (smooth velocity)
+    - guarantees C1 continuity (smooth velocity)
 
     The curve is a weighted combination of the four points,
     where the weights are polynomials in t.
