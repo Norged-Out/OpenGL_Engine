@@ -15,6 +15,7 @@ This repository is intended to be used as a **vendored engine** (via `add_subdir
 - Math via GLM
 - UI via Dear ImGui (GLFW + OpenGL3 backend)
 - Texture loading via stb_image
+- Skybox rendering using custom HDRI converter and stb_image
 - Clean CMake target boundaries
 - No package manager required
 
