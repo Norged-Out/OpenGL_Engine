@@ -13,31 +13,6 @@
 #include <algorithm>
 namespace fs = std::filesystem;
 
-static std::string toLower(std::string s) {
-    std::transform(s.begin(), s.end(), s.begin(),
-        [](unsigned char c) { return (char)std::tolower(c); });
-    return s;
-}
-
-static std::string findFirstMatchingTexture(
-    const std::string& dir,
-    const std::initializer_list<const char*>& keywords)
-{
-    if (!fs::exists(dir) || !fs::is_directory(dir)) return "";
-
-    for (const auto& entry : fs::directory_iterator(dir)) {
-        if (!entry.is_regular_file()) continue;
-
-        std::string name = toLower(entry.path().filename().string());
-        for (const char* k : keywords) {
-            if (name.find(k) != std::string::npos) {
-                return entry.path().string();
-            }
-        }
-    }
-    return "";
-}
-
 // helper to extract model path
 static std::string getModelDirectory(const std::string& modelPath) {
     size_t lastSlash = modelPath.find_last_of("/\\");
@@ -166,11 +141,35 @@ void Model::processNode(aiNode* node, const aiScene* scene) {
     }
 }
 
+static std::string toLower(std::string s) {
+    std::transform(s.begin(), s.end(), s.begin(),
+        [](unsigned char c) { return (char)std::tolower(c); });
+    return s;
+}
+
+static std::string findFirstMatchingTexture(
+    const std::string& dir,
+    const std::vector<std::string>& keywords)
+{
+    if (!fs::exists(dir) || !fs::is_directory(dir)) return "";
+
+    for (const auto& entry : fs::directory_iterator(dir)) {
+        if (!entry.is_regular_file()) continue;
+
+        std::string name = toLower(entry.path().filename().string());
+        for (const std::string& k : keywords) {
+            if (name.find(k) != std::string::npos) {
+                return entry.path().string();
+            }
+        }
+    }
+    return "";
+}
 
 std::shared_ptr<Texture> Model::loadTexture(const aiString& path,
     const char* typeName, const aiScene* scene, GLuint slot) {
-
-    std::string key = path.C_Str();
+    // Cache key includes semantic to avoid collisions
+    std::string key = std::string(typeName) + ":" + path.C_Str();
 
     // cache hit
     auto it = textureCache.find(key);
@@ -178,8 +177,9 @@ std::shared_ptr<Texture> Model::loadTexture(const aiString& path,
         return it->second;
 
     std::shared_ptr<Texture> tex;
+    const char* cpath = path.C_Str();
 
-    if (!key.empty() && key[0] == '*') {
+    if (cpath[0] == '*') {
         std::cout << "[Texture] Embedded texture detected: "
             << key << "\n";
     }
@@ -188,21 +188,20 @@ std::shared_ptr<Texture> Model::loadTexture(const aiString& path,
             << directory << "/" << key << "\n";
     }
 
-
     // embedded texture
-    if (!key.empty() && key[0] == '*') {
-        int idx = std::atoi(key.c_str() + 1);
+    if (cpath[0] == '*') {
+        int idx = std::atoi(cpath + 1);
         const aiTexture* aiTex = scene->mTextures[idx];
 
         const unsigned char* bytes =
             reinterpret_cast<const unsigned char*>(aiTex->pcData);
 
-        size_t size = aiTex->mWidth;
+        size_t size = aiTex->mWidth; // slot will be ignored
         tex = std::make_shared<Texture>(bytes, size, typeName, slot, GL_UNSIGNED_BYTE);
     }
     // external texture
     else {
-        std::string fullPath = directory + "/" + key;
+        std::string fullPath = directory + "/" + cpath;
         tex = std::make_shared<Texture>(fullPath.c_str(), typeName, slot, GL_UNSIGNED_BYTE);
     }
 
@@ -210,24 +209,43 @@ std::shared_ptr<Texture> Model::loadTexture(const aiString& path,
     return tex;
 }
 
-
 void Model::attachTextures(std::vector<std::shared_ptr<Texture>>& textures,
     aiMaterial* material, const aiScene* scene) {
     std::cout << "\n[Material] Processing material\n";
-
+    
+    // Define the texture types and their corresponding uniform names
     static const std::vector<std::pair<aiTextureType, const char*>> types = {
-        { aiTextureType_BASE_COLOR, "diffuse" },
-        { aiTextureType_DIFFUSE,    "diffuse" },
-        { aiTextureType_SPECULAR,   "specular" },
-        { aiTextureType_NORMALS,    "normal" },
+        // Base color
+        { aiTextureType_BASE_COLOR,        "diffuse" },
+        { aiTextureType_DIFFUSE,           "diffuse" },
+
+        // Normal mapping
+        { aiTextureType_NORMALS,           "normal" },
+
+        // Specular workflow (legacy)
+        { aiTextureType_SPECULAR,          "specular" },
+
+        // Metallic–roughness workflow
+        { aiTextureType_METALNESS,         "metallic" },
+        { aiTextureType_DIFFUSE_ROUGHNESS, "roughness" },
+
+        // Ambient occlusion
+        { aiTextureType_AMBIENT_OCCLUSION, "ao" }
     };
 
-    GLuint slot = 0;
+    // Prevent duplicate semantics (one texture per type)
+    auto hasType = [&](const char* type) {
+        return std::any_of(textures.begin(), textures.end(),
+            [&](const std::shared_ptr<Texture>& t) {
+                return std::strcmp(t->type, type) == 0;
+            });
+    };
 
 	// Load with Assimp material textures
     for (const auto& pair : types) {
         aiTextureType type = pair.first;
         const char* name = pair.second;
+        if (hasType(name)) continue;
 
         for (unsigned i = 0; i < material->GetTextureCount(type); ++i) {
             aiString path;
@@ -237,7 +255,7 @@ void Model::attachTextures(std::vector<std::shared_ptr<Texture>>& textures,
                 << path.C_Str()
                 << "\" (type = " << name << ")\n";
 
-            auto tex = loadTexture(path, name, scene, slot++);
+            auto tex = loadTexture(path, name, scene, 0);
             textures.push_back(tex);
         }
     }
@@ -246,28 +264,26 @@ void Model::attachTextures(std::vector<std::shared_ptr<Texture>>& textures,
     if (textures.empty() && scene->mNumTextures == 0) {
         std::cout << "[Texture] No material textures; trying fallback folder\n";
 
-        std::string diffuseFile = findFirstMatchingTexture(
-            texturesDir, { "basecolor","albedo","diffuse","color" }
-        );
-        std::string normalFile = findFirstMatchingTexture(
-            texturesDir, { "normal","nrm" }
-        );
+        auto tryAdd = [&](const char* semantic,
+                          const std::vector<std::string>& hints)
+        {
+            if (hasType(semantic)) return;
+            std::string file = findFirstMatchingTexture(texturesDir, hints);
+            if (!file.empty()) {
+                std::cout << "[Texture] Fallback " << semantic << ": "
+                          << file << "\n";
+                textures.push_back(std::make_shared<Texture>(
+                    file.c_str(), semantic, 0, GL_UNSIGNED_BYTE));
+            }
+        };
 
-        GLuint slot = 0;
-
-        if (!diffuseFile.empty()) {
-            std::cout << "[Texture] Fallback diffuse: " << diffuseFile << "\n";
-            textures.push_back(std::make_shared<Texture>(
-                diffuseFile.c_str(), "diffuse", slot++, GL_UNSIGNED_BYTE));
-        }
-
-        if (!normalFile.empty()) {
-            std::cout << "[Texture] Fallback normal: " << normalFile << "\n";
-            textures.push_back(std::make_shared<Texture>(
-                normalFile.c_str(), "normal", slot++, GL_UNSIGNED_BYTE));
-        }
+        tryAdd("diffuse",   { "basecolor","albedo","diffuse","color" });
+        tryAdd("normal",    { "normal","nrm" });
+        tryAdd("specular",  { "specular","spec" });
+        tryAdd("roughness", { "rough","roughness" });
+        tryAdd("metallic",  { "metal","metallic" });
+        tryAdd("ao",        { "ao","ambient" });
     }
-
 }
 
 void Model::generateTangents(std::vector<Vertex>& vertices,
