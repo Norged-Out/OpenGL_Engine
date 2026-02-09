@@ -4,6 +4,8 @@
 #include <string>
 class Shader;
 
+// TODO: Texture should not own slot or semantic.
+//       Move binding policy to Material/Mesh.
 enum class TextureSlot {
     Diffuse  = 0,
     Specular = 1,
@@ -34,7 +36,8 @@ public:
 	// Assigns a texture unit to a texture
 	void texUnit(Shader& shader, const char* uniform, GLuint unit);
 	// Binds a texture
-	void Bind();
+	void Bind(); // Bind to existing texture unit
+	void Bind(GLuint unit); // Bind to a specific texture unit
 	// Unbinds a texture
 	void Unbind();
 	// Deletes a texture

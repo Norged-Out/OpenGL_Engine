@@ -70,7 +70,7 @@ void Mesh::Draw(Shader& shader) {
               << ", slot = " << slot << "\n";
 			  
         tex->texUnit(shader, uniform.c_str(), slot);
-        tex->Bind();
+        tex->Bind(slot);
     }
 
 	// Draw the actual mesh

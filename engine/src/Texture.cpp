@@ -121,9 +121,14 @@ void Texture::texUnit(Shader& shader, const char* uniform, GLuint unit) {
 void Texture::Bind() {
 	glActiveTexture(GL_TEXTURE0 + slot);
 	glBindTexture(GL_TEXTURE_2D, ID);
+}
+
+void Texture::Bind(GLuint unit) {
+	glActiveTexture(GL_TEXTURE0 + unit);
+	glBindTexture(GL_TEXTURE_2D, ID);
 
 	std::cout << "[Texture::Bind] ID=" << ID
-              << " bound to slot " << slot << "\n";
+              << " bound to unit " << unit << "\n";
 }
 
 void Texture::Unbind() {
