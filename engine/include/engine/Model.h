@@ -77,9 +77,11 @@ private:
     std::shared_ptr<Mesh> processMesh(aiMesh* mesh, const aiScene* scene);
     
 	// Texture loading
-    std::shared_ptr<Texture> LoadTexture(const aiString& path,
+    std::shared_ptr<Texture> loadTexture(const aiString& path,
         const char* typeName, const aiScene* scene,GLuint slot);
-
-    void AttachTextures(std::vector<std::shared_ptr<Texture>>& textures,
+    void attachTextures(std::vector<std::shared_ptr<Texture>>& textures,
         aiMaterial* material, const aiScene* scene);
+
+    // Tangent generation
+    void generateTangents(std::vector<Vertex>& vertices, const std::vector<GLuint>& indices);
 };

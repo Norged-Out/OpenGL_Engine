@@ -167,7 +167,7 @@ void Model::processNode(aiNode* node, const aiScene* scene) {
 }
 
 
-std::shared_ptr<Texture> Model::LoadTexture(const aiString& path,
+std::shared_ptr<Texture> Model::loadTexture(const aiString& path,
     const char* typeName, const aiScene* scene, GLuint slot) {
 
     std::string key = path.C_Str();
@@ -211,7 +211,7 @@ std::shared_ptr<Texture> Model::LoadTexture(const aiString& path,
 }
 
 
-void Model::AttachTextures(std::vector<std::shared_ptr<Texture>>& textures,
+void Model::attachTextures(std::vector<std::shared_ptr<Texture>>& textures,
     aiMaterial* material, const aiScene* scene) {
     std::cout << "\n[Material] Processing material\n";
 
@@ -237,7 +237,7 @@ void Model::AttachTextures(std::vector<std::shared_ptr<Texture>>& textures,
                 << path.C_Str()
                 << "\" (type = " << name << ")\n";
 
-            auto tex = LoadTexture(path, name, scene, slot++);
+            auto tex = loadTexture(path, name, scene, slot++);
             textures.push_back(tex);
         }
     }
@@ -270,7 +270,46 @@ void Model::AttachTextures(std::vector<std::shared_ptr<Texture>>& textures,
 
 }
 
+void Model::generateTangents(std::vector<Vertex>& vertices,
+    const std::vector<GLuint>& indices) {
+    // Per-triangle tangent accumulation 
+    for (size_t i = 0; i < indices.size(); i += 3) {
+        // Fetch the three vertices of the triangle
+        Vertex& v0 = vertices[indices[i + 0]];
+        Vertex& v1 = vertices[indices[i + 1]];
+        Vertex& v2 = vertices[indices[i + 2]];
 
+        // Edges of the triangle in object space
+        glm::vec3 e1 = v1.position - v0.position;
+        glm::vec3 e2 = v2.position - v0.position;
+
+        // Edges of the triangle in UV space
+        glm::vec2 deltaUV1 = v1.texUV - v0.texUV;
+        glm::vec2 deltaUV2 = v2.texUV - v0.texUV;
+
+        // Compute determinant of the UV matrix
+        float determinant = deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y;
+        if (fabs(determinant) < 1e-6f) continue;
+        float invDet = 1.0f / determinant;
+
+        // Compute the tangent vector for this triangle
+        glm::vec3 tangent = invDet * (deltaUV2.y * e1 - deltaUV1.y * e2);
+
+        // Accumulate the tangent into each vertex of the triangle
+        v0.tangent += tangent;
+        v1.tangent += tangent;
+        v2.tangent += tangent;
+    }
+    // Per-vertex normalization & orthogonalization
+    for (auto& v : vertices) {
+        // Skip vertices that never received tangent data
+        if (glm::length(v.tangent) == 0.0f) continue;
+        // Gram-Schmidt orthogonalize tangent with respect to normal
+        v.tangent = glm::normalize(
+            v.tangent - v.normal * glm::dot(v.normal, v.tangent)
+        );
+    }
+}
 
 std::shared_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     std::vector<Vertex> vertices;
@@ -279,7 +318,7 @@ std::shared_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
     // extract vertex data
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
-        Vertex vertex;
+        Vertex vertex{}; // zero-initialize
         
         // Vertex position
         vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
@@ -299,6 +338,12 @@ std::shared_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         // Optional: Vertex color
         vertex.color = glm::vec3(1.0f); // Default white
 
+        // Optional: Tangent
+        if (mesh->HasTangentsAndBitangents())
+            vertex.tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
+        else
+            vertex.tangent = glm::vec3(0.0f);
+
         vertices.push_back(vertex);
     }
 
@@ -313,7 +358,12 @@ std::shared_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     // process textures
     if (mesh->mMaterialIndex >= 0) {
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        AttachTextures(textures, material, scene);
+        attachTextures(textures, material, scene);
+    }
+
+    // generate tangents manually if not provided but UVs exist
+    if (!mesh->HasTangentsAndBitangents() && mesh->HasTextureCoords(0)) {
+        generateTangents(vertices, indices);
     }
 
     // construct Mesh in place once and transfer ownership into Model
