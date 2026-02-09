@@ -52,23 +52,17 @@ void Mesh::setScale(const glm::vec3& scale) {
 }
 
 void Mesh::Draw(Shader& shader) {
-	// Keep track of how many of each type of textures we have
-	unsigned int numDiffuse = 0;
-	unsigned int numSpecular = 0;
-
 	// bind textures in order
-	for (unsigned int i = 0; i < textures.size(); i++) {
-		std::string num;
-		std::string type = textures[i]->type;
-		if (type == "diffuse") {
-			num = std::to_string(numDiffuse++);
-		}
-		else if (type == "specular") {
-			num = std::to_string(numSpecular++);
-		}
-		textures[i]->texUnit(shader, (type + num).c_str(), i);
-		textures[i]->Bind();
-	}
+	for (auto& tex : textures) {
+        GLuint slot;
+        std::string uniform;
+
+        if (!Texture::getTextureSlot(tex->type, slot, uniform))
+            continue;
+
+        tex->texUnit(shader, uniform.c_str(), slot);
+        tex->Bind();
+    }
 
 	// Draw the actual mesh
 	vao.Bind();

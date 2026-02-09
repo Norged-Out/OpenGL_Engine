@@ -1,7 +1,17 @@
 #pragma once
 
 #include <glad/glad.h>
+#include <string>
 class Shader;
+
+enum class TextureSlot {
+    Diffuse  = 0,
+    Specular = 1,
+    Normal   = 2,
+    Roughness= 3,
+    Metallic = 4,
+    AO       = 5
+};
 
 class Texture
 {
@@ -29,4 +39,17 @@ public:
 	void Unbind();
 	// Deletes a texture
 	void Delete();
+
+	// Helper function to map texture semantic to fixed slot + uniform
+	static inline bool getTextureSlot(const std::string& type, GLuint& outSlot,
+		std::string& uniform){
+		if (type == "diffuse")   { outSlot = 0; uniform = "diffuse0"; }
+		else if (type == "specular") { outSlot = 1; uniform = "specular0"; }
+		else if (type == "normal")   { outSlot = 2; uniform = "normal0"; }
+		else if (type == "roughness"){ outSlot = 3; uniform = "roughness0"; }
+		else if (type == "metallic") { outSlot = 4; uniform = "metallic0"; }
+		else if (type == "ao")       { outSlot = 5; uniform = "ao0"; }
+		else return false;
+		return true;
+	}
 };
