@@ -21,7 +21,8 @@ std::string get_file_contents(const std::string& filename) {
 }
 
 // Constructor that build the Shader Program from 2 different shaders
-Shader::Shader(const std::string& vertexFile, const std::string& fragmentFile) {
+Shader::Shader(const std::string& vertexFile, const std::string& fragmentFile)
+	: vertexPath(vertexFile), fragmentPath(fragmentFile) {
 	// Read vertexFile and fragmentFile and store the strings
 	std::string vertexCode = get_file_contents(vertexFile);
 	std::string fragmentCode = get_file_contents(fragmentFile);
@@ -84,7 +85,10 @@ GLint Shader::getUniformLocation(const std::string& name) const {
 	if (it != uniformCache.end()) return it->second;
 
 	GLint loc = glGetUniformLocation(ID, name.c_str());
-	// Cache even if -1 (lets us skip repeated GL calls)
+	if (loc == -1) {
+		std::cerr << "[Shader] Warning: uniform '" << name
+				<< "' not found or optimized out\n";
+	}
 	uniformCache[name] = loc;
 	return loc;
 }
@@ -141,7 +145,9 @@ void Shader::checkCompileErrors(GLuint shader, const std::string& type) {
 		if (!success) {
 			glGetShaderInfoLog(shader, 1024, NULL, infoLog);
 			std::cerr << "SHADER COMPILATION ERROR (" << type << "):\n"
+				<< (type == "VERTEX" ? vertexPath : fragmentPath) << "\n"
 				<< infoLog << std::endl;
+			std::terminate();
 		}
 	}
 	else {
@@ -150,6 +156,7 @@ void Shader::checkCompileErrors(GLuint shader, const std::string& type) {
 			glGetProgramInfoLog(shader, 1024, NULL, infoLog);
 			std::cerr << "PROGRAM LINKING ERROR:\n"
 				<< infoLog << std::endl;
+			std::terminate();
 		}
 	}
 }

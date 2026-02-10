@@ -40,6 +40,9 @@ public:
 	Shader& operator=(const Shader&) = delete;
 
 private:
+	// path to shader source files
+	std::string vertexPath;
+	std::string fragmentPath;
 	// cache of uniform locations to reduce calls
 	mutable std::unordered_map<std::string, GLint> uniformCache;
 	GLint getUniformLocation(const std::string& name) const;
