@@ -57,7 +57,7 @@ void Mesh::Draw(Shader& shader) {
         GLuint slot;
         std::string uniform;
 
-        //if (!tex->getTextureSlot(tex->type, slot, uniform)) continue;
+        if (!tex->getTextureSlot(tex->type, slot, uniform)) continue;
 
         tex->texUnit(shader, uniform.c_str(), slot);
         tex->Bind(slot);
