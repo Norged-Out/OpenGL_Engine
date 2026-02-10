@@ -85,6 +85,7 @@ add_library(engine
     engine/src/Camera.cpp
     engine/src/Cubemap.cpp
     engine/src/EBO.cpp
+    engine/src/Geometry.cpp
     engine/src/HDRConverter.cpp
     engine/src/HDRTexture.cpp
     engine/src/MathUtils.cpp
