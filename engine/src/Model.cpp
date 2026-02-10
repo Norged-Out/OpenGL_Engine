@@ -191,14 +191,14 @@ std::shared_ptr<Texture> Model::loadTexture(const aiString& path,
             reinterpret_cast<const unsigned char*>(aiTex->pcData);
 
         size_t size = aiTex->mWidth; // slot will be ignored
-        tex = std::make_shared<Texture>(bytes, size, slot, GL_UNSIGNED_BYTE);
+        tex = std::make_shared<Texture>(bytes, size, typeName, slot, GL_UNSIGNED_BYTE);
     }
     // external texture
     else {
         std::cout << "[Texture] External texture detected: "
             << directory << "/" << key << "\n";
         std::string fullPath = directory + "/" + cpath;
-        tex = std::make_shared<Texture>(fullPath.c_str(), slot, GL_UNSIGNED_BYTE);
+        tex = std::make_shared<Texture>(fullPath.c_str(), typeName, slot, GL_UNSIGNED_BYTE);
     }
 
     textureCache[key] = tex;
@@ -230,18 +230,18 @@ void Model::attachTextures(std::vector<std::shared_ptr<Texture>>& textures,
     };
 
     // Prevent duplicate semantics (one texture per type)
-    // auto hasType = [&](const char* type) {
-    //     return std::any_of(textures.begin(), textures.end(),
-    //         [&](const std::shared_ptr<Texture>& t) {
-    //             return std::strcmp(t->type, type) == 0;
-    //         });
-    // };
+    auto hasType = [&](const char* type) {
+        return std::any_of(textures.begin(), textures.end(),
+            [&](const std::shared_ptr<Texture>& t) {
+                return std::strcmp(t->type, type) == 0;
+            });
+    };
 
 	// Load with Assimp material textures
     for (const auto& pair : types) {
         aiTextureType type = pair.first;
         const char* name = pair.second;
-        //if (hasType(name)) continue;
+        if (hasType(name)) continue;
 
         for (unsigned i = 0; i < material->GetTextureCount(type); ++i) {
             aiString path;
@@ -263,13 +263,13 @@ void Model::attachTextures(std::vector<std::shared_ptr<Texture>>& textures,
         auto tryAdd = [&](const char* semantic,
                           const std::vector<std::string>& hints)
         {
-            //if (hasType(semantic)) return;
+            if (hasType(semantic)) return;
             std::string file = findFirstMatchingTexture(texturesDir, hints);
             if (!file.empty()) {
                 std::cout << "[Texture] Fallback " << semantic << ": "
                           << file << "\n";
                 textures.push_back(std::make_shared<Texture>(
-                    file.c_str(), 0, GL_UNSIGNED_BYTE));
+                    file.c_str(), semantic, 0, GL_UNSIGNED_BYTE));
             }
         };
 

@@ -3,7 +3,9 @@
 #include <iostream>
 #include <stb_image.h>
 
-Texture::Texture(const char* image, GLuint texSlot, GLenum pixelType) {
+Texture::Texture(const char* image, const char* texType, GLuint texSlot, GLenum pixelType) {
+	// Assigns the type of the texture ot the texture object
+	type = texType;
 	// Remember the slot
 	slot = texSlot;
 
@@ -53,7 +55,9 @@ Texture::Texture(const char* image, GLuint texSlot, GLenum pixelType) {
 }
 
 // Constructor for embedded textures loaded from memory
-Texture::Texture(const unsigned char* data, size_t size, GLuint texSlot, GLenum pixelType) {
+Texture::Texture(const unsigned char* data, size_t size, const char* texType, GLuint texSlot, GLenum pixelType) {
+	// Assigns the type of the texture ot the texture object
+	type = texType;
 	// Remember the slot
 	slot = texSlot;
 
