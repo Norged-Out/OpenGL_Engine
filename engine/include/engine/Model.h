@@ -11,6 +11,7 @@
 #include <glm/gtc/quaternion.hpp> 
 #include "engine/Mesh.h"
 #include "engine/MathUtils.h"
+
 class Shader;
 class Texture;
 
@@ -33,7 +34,7 @@ public:
     // additional usage for Rotation
     void setRotationQuat(const glm::quat& q);
     void setRotationEuler(float pitchDeg, float yawDeg, float rollDeg,
-                      RotationOrder order = RotationOrder::YXZ);
+                      MathUtils::RotationOrder order = MathUtils::RotationOrder::YXZ);
     glm::quat getRotationQuat() const;
 
 	glm::mat4 getModelMatrix() const {
@@ -82,7 +83,4 @@ private:
         const char* typeName, const aiScene* scene,GLuint slot);
     void attachTextures(std::vector<std::shared_ptr<Texture>>& textures,
         aiMaterial* material, const aiScene* scene);
-
-    // Tangent generation
-    void generateTangents(std::vector<Vertex>& vertices, const std::vector<GLuint>& indices);
 };

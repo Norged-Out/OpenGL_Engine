@@ -2,24 +2,15 @@
 
 #include <glm/glm.hpp>
 #include <glad/glad.h>
-#include <vector>
-
-struct Vertex
-{
-	glm::vec3 position;
-	glm::vec3 normal;
-	glm::vec3 color;
-	glm::vec2 texUV;
-	glm::vec4 tangent; // xyz = tangent, w = handedness
-};
+#include <cstddef>
 
 class VBO
 {
 public:
 	// Reference ID of the Vertex Buffer Object
 	GLuint ID;
-	// Constructor that generates a Vertex Buffer Object and links it to vertices
-	VBO(const std::vector<Vertex>& vertices);
+	// Constructor that generates a Vertex Buffer Object
+	VBO(const void* data, size_t sizeBytes, GLenum usage = GL_STATIC_DRAW);
 	// Destructor
 	~VBO() {
 		if (ID != 0) Delete();

@@ -10,6 +10,15 @@
 #include "engine/Texture.h"
 class Shader;
 
+struct Vertex
+{
+	glm::vec3 position;
+	glm::vec3 normal;
+	glm::vec3 color;
+	glm::vec2 texUV;
+	glm::vec4 tangent; // xyz = tangent, w = handedness
+};
+
 class Mesh
 {
 public:
@@ -38,6 +47,7 @@ public:
 	void setPosition(const glm::vec3& pos);
 	void setRotation(float angle, const glm::vec3& axis);
 	void setScale(const glm::vec3& scale);
+	void setTextures(const std::vector<std::shared_ptr<Texture>>& texs);
 
 	// Draws the mesh
 	void Draw(Shader& shader);

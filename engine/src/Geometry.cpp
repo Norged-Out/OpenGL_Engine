@@ -4,6 +4,94 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+std::unique_ptr<Mesh> Geometry::createCubeMesh() {
+    std::vector<Vertex> vertices = {
+        // +Z
+        {{-0.5f,-0.5f, 0.5f},{0,0,1},{1,1,1},{0,0}},
+        {{ 0.5f,-0.5f, 0.5f},{0,0,1},{1,1,1},{1,0}},
+        {{ 0.5f, 0.5f, 0.5f},{0,0,1},{1,1,1},{1,1}},
+        {{-0.5f, 0.5f, 0.5f},{0,0,1},{1,1,1},{0,1}},
+        // -Z
+        {{ 0.5f,-0.5f,-0.5f},{0,0,-1},{1,1,1},{0,0}},
+        {{-0.5f,-0.5f,-0.5f},{0,0,-1},{1,1,1},{1,0}},
+        {{-0.5f, 0.5f,-0.5f},{0,0,-1},{1,1,1},{1,1}},
+        {{ 0.5f, 0.5f,-0.5f},{0,0,-1},{1,1,1},{0,1}},
+    };
+
+    std::vector<GLuint> indices = {
+        0,1,2, 0,2,3,
+        4,5,6, 4,6,7
+    };
+
+    std::vector<std::shared_ptr<Texture>> textures;
+    Geometry::generateTangents(vertices, indices);
+    std::cout << "[Cube] Vertices: " << vertices.size()
+          << " | Indices: " << indices.size() << std::endl;
+    return std::make_unique<Mesh>(vertices, indices, textures);
+}
+
+std::unique_ptr<Mesh> Geometry::createPlaneMesh() {
+    std::vector<Vertex> vertices = {
+        {{-0.5f,0, -0.5f},{0,1,0},{1,1,1},{0,0}},
+        {{ 0.5f,0, -0.5f},{0,1,0},{1,1,1},{1,0}},
+        {{ 0.5f,0,  0.5f},{0,1,0},{1,1,1},{1,1}},
+        {{-0.5f,0,  0.5f},{0,1,0},{1,1,1},{0,1}},
+    };
+
+    std::vector<GLuint> indices = { 0,1,2, 0,2,3 };
+
+    std::vector<std::shared_ptr<Texture>> textures;
+    Geometry::generateTangents(vertices, indices);
+    std::cout << "[Plane] Vertices: " << vertices.size()
+          << " | Indices: " << indices.size() << std::endl;
+    return std::make_unique<Mesh>(vertices, indices, textures);
+}
+
+std::unique_ptr<Mesh> Geometry::createPyramidMesh() {
+    // full vertex setup
+    std::vector<Vertex> vertices = {
+        // base
+        {{-0.5f, -0.5f, -0.5f}, {0,-1,0}, {1,1,1}, {0,0}},
+        {{ 0.5f, -0.5f, -0.5f}, {0,-1,0}, {1,1,1}, {1,0}},
+        {{ 0.5f, -0.5f,  0.5f}, {0,-1,0}, {1,1,1}, {1,1}},
+        {{-0.5f, -0.5f,  0.5f}, {0,-1,0}, {1,1,1}, {0,1}},
+
+        // front face (+Z)
+        {{-0.5f,-0.5f, 0.5f}, {0,0.5f,0.9f}, {1,1,1}, {0,0}},
+        {{ 0.5f,-0.5f, 0.5f}, {0,0.5f,0.9f}, {1,1,1}, {1,0}},
+        {{ 0.0f, 0.5f, 0.0f}, {0,0.5f,0.9f}, {1,1,1}, {0.5f,1}},
+
+        // right face (+X)
+        {{ 0.5f,-0.5f, 0.5f}, {0.9f,0.5f,0}, {1,1,1}, {0,0}},
+        {{ 0.5f,-0.5f,-0.5f}, {0.9f,0.5f,0}, {1,1,1}, {1,0}},
+        {{ 0.0f, 0.5f, 0.0f}, {0.9f,0.5f,0}, {1,1,1}, {0.5f,1}},
+
+        // back face (-Z)
+        {{ 0.5f,-0.5f,-0.5f}, {0,0.5f,-0.9f}, {1,1,1}, {0,0}},
+        {{-0.5f,-0.5f,-0.5f}, {0,0.5f,-0.9f}, {1,1,1}, {1,0}},
+        {{ 0.0f, 0.5f, 0.0f}, {0,0.5f,-0.9f}, {1,1,1}, {0.5f,1}},
+
+        // left face (-X)
+        {{-0.5f,-0.5f,-0.5f}, {-0.9f,0.5f,0}, {1,1,1}, {0,0}},
+        {{-0.5f,-0.5f, 0.5f}, {-0.9f,0.5f,0}, {1,1,1}, {1,0}},
+        {{ 0.0f, 0.5f, 0.0f}, {-0.9f,0.5f,0}, {1,1,1}, {0.5f,1}},
+    };
+
+    // for EBO
+    std::vector<GLuint> indices = {
+        0,1,2, 0,2,3,      // base
+        4,5,6,             // front
+        7,8,9,             // right
+        10,11,12,          // back
+        13,14,15           // left
+    };
+
+    std::vector<std::shared_ptr<Texture>> textures;
+    Geometry::generateTangents(vertices, indices);
+    std::cout << "[Pyramid] Vertices: " << vertices.size()
+          << " | Indices: " << indices.size() << std::endl;
+    return std::make_unique<Mesh>(vertices, indices, textures);
+}
 
 std::unique_ptr<Mesh> Geometry::createSphereMesh(int stacks, int slices) {
     std::vector<Vertex> vertices;
@@ -29,9 +117,6 @@ std::unique_ptr<Mesh> Geometry::createSphereMesh(int stacks, int slices) {
             vert.color = glm::vec3(1.0f);
             vert.texUV = glm::vec2(uTex, vTex);
 
-            glm::vec3 tangent = glm::normalize(glm::vec3(-st, 0.0f, ct)); // points in direction of increasing u
-            vert.tangent = glm::vec4(tangent, 1.0f);
-
             vertices.push_back(vert);
         }
     }
@@ -53,35 +138,117 @@ std::unique_ptr<Mesh> Geometry::createSphereMesh(int stacks, int slices) {
     }
 
     std::vector<std::shared_ptr<Texture>> textures;
+    Geometry::generateTangents(vertices, indices);
     std::cout << "[Sphere] Vertices: " << vertices.size()
           << " | Indices: " << indices.size() << std::endl;
 
     return std::make_unique<Mesh>(vertices, indices, textures);
 }
 
-std::unique_ptr<Mesh> Geometry::createTexturedSphere(bool applyTextures, const std::string& texPath, int stacks, int slices) {
-    std::unique_ptr<Mesh> sphereMesh = createSphereMesh(stacks, slices);
-    if (!applyTextures) {
-        sphereMesh->textures.clear();
-        return sphereMesh;
+std::unique_ptr<Mesh> Geometry::createRingMesh() {
+    std::vector<Vertex> vertices;
+    std::vector<GLuint>  indices;
+    float outerRadius = 1.7f;
+    float innerRadius = 1.5f;
+    float height = 0.4f;      // how thick the ring is
+    int segments = 64;         // how smooth the circle is
+    float uvScale = 2.0f;
+
+    // generate top and bottom ring faces
+    for (int i = 0; i <= segments; ++i) {
+        float angle = (float)i / segments * 2.0f * M_PI;
+        float c = cosf(angle);
+        float s = sinf(angle);
+
+        glm::vec3 normalUp(0.0f, 1.0f, 0.0f);
+        glm::vec3 normalDown(0.0f, -1.0f, 0.0f);
+
+        float bevel = 0.05f; // how curved the edges appear
+
+        // top outer
+        vertices.push_back({
+            glm::vec3(c * (outerRadius - bevel), +height * 0.5f - bevel, s * (outerRadius - bevel)),
+            glm::normalize(glm::vec3(c, 0.7f, s)),
+            glm::vec3(1.0f),
+            glm::vec2(c, s) * uvScale
+            });
+
+        // top inner
+        vertices.push_back({
+            glm::vec3(c * (innerRadius + bevel), +height * 0.5f - bevel, s * (innerRadius + bevel)),
+            glm::normalize(glm::vec3(-c, 0.7f, -s)),
+            glm::vec3(1.0f),
+            glm::vec2(c, s) * uvScale
+            });
+
+        // bottom outer
+        vertices.push_back({
+            glm::vec3(c * (outerRadius - bevel), -height * 0.5f + bevel, s * (outerRadius - bevel)),
+            glm::normalize(glm::vec3(c, -0.7f, s)),
+            glm::vec3(1.0f),
+            glm::vec2(c, s) * uvScale
+            });
+
+        // bottom inner
+        vertices.push_back({
+            glm::vec3(c * (innerRadius + bevel), -height * 0.5f + bevel, s * (innerRadius + bevel)),
+            glm::normalize(glm::vec3(-c, -0.7f, -s)),
+            glm::vec3(1.0f),
+            glm::vec2(c, s) * uvScale
+            });
     }
 
-    std::cout << "[Sphere] Loading textures from: " << texPath << std::endl;
+    // connect quads around ring sides
+    int ringStride = 4;
+    for (int i = 0; i < segments; ++i) {
+        int i0 = i * ringStride;
+        int i1 = (i + 1) * ringStride;
 
-    auto diffuse  = std::make_shared<Texture>((texPath + "/diffuse.png").c_str(), "diffuse",  0, GL_UNSIGNED_BYTE);    
-    auto normal   = std::make_shared<Texture>((texPath + "/normal.png").c_str(),  "normal",   2, GL_UNSIGNED_BYTE);
-    auto roughness = std::make_shared<Texture>((texPath + "/rough.png").c_str(), "roughness", 3, GL_UNSIGNED_BYTE);
-    //auto ao       = std::make_shared<Texture>((texPath + "/ao.png").c_str(),         "ao",       5, GL_UNSIGNED_BYTE);
+        // top face
+        indices.push_back((GLuint)i0);
+        indices.push_back((GLuint)(i0 + 1));
+        indices.push_back((GLuint)(i1 + 1));
+        indices.push_back((GLuint)i0);
+        indices.push_back((GLuint)(i1 + 1));
+        indices.push_back((GLuint)i1);
 
-    sphereMesh->textures = { diffuse, normal, roughness  /*, ao*/ };
-    std::cout << "[Sphere] Textures bound: " << sphereMesh->textures.size() << std::endl;
+        // bottom face
+        indices.push_back((GLuint)i0 + 2);
+        indices.push_back((GLuint)(i1 + 3));
+        indices.push_back((GLuint)(i0 + 3));
+        indices.push_back((GLuint)i0 + 2);
+        indices.push_back((GLuint)(i1 + 2));
+        indices.push_back((GLuint)i1 + 3);
 
-    return sphereMesh;
+        // outer wall
+        indices.push_back((GLuint)i0);
+        indices.push_back((GLuint)(i1));
+        indices.push_back((GLuint)(i1 + 2));
+        indices.push_back((GLuint)i0);
+        indices.push_back((GLuint)(i1 + 2));
+        indices.push_back((GLuint)i0 + 2);
+
+        // inner wall
+        indices.push_back((GLuint)i0 + 1);
+        indices.push_back((GLuint)(i0 + 3));
+        indices.push_back((GLuint)(i1 + 3));
+        indices.push_back((GLuint)i0 + 1);
+        indices.push_back((GLuint)(i1 + 3));
+        indices.push_back((GLuint)i1 + 1);
+    }
+
+    std::vector<std::shared_ptr<Texture>> textures;    
+    Geometry::generateTangents(vertices, indices);
+    std::cout << "[Ring] Vertices: " << vertices.size()
+          << " | Indices: " << indices.size() << std::endl;
+
+    return std::make_unique<Mesh>(vertices, indices, textures);
 }
-
 
 void Geometry::generateTangents(std::vector<Vertex>& vertices,
     const std::vector<GLuint>& indices) {
+    std::cout << "[TangentGen] Generating tangents for " << vertices.size() << " vertices and "
+              << indices.size() / 3 << " triangles..." << std::endl;
     // Reset tangents
     for (auto& v : vertices) {
         v.tangent = glm::vec4(0.0f);

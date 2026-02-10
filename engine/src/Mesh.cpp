@@ -7,7 +7,8 @@
 Mesh::Mesh(const std::vector <Vertex>& vert, 
 			const std::vector <GLuint>& inds, 
 			const std::vector<std::shared_ptr<Texture>>& texs)
-	: vertices(vert), indices(inds), textures(texs), vbo(vertices), ebo(indices) {
+	: vertices(vert), indices(inds), textures(texs), 
+	vbo(vertices.data(), vertices.size() * sizeof(Vertex)), ebo(indices) {
 	// bind vao since default constructor is already called
 	vao.Bind();
 	ebo.Bind(); // sync with vao
@@ -49,6 +50,10 @@ void Mesh::setRotation(float angle, const glm::vec3& axis) {
 
 void Mesh::setScale(const glm::vec3& scale) {
 	modelMatrix = glm::scale(modelMatrix, scale);
+}
+
+void Mesh::setTextures(const std::vector<std::shared_ptr<Texture>>& texs) {
+    textures = texs;
 }
 
 void Mesh::Draw(Shader& shader) {

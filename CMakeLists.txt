@@ -82,6 +82,7 @@ target_link_libraries(imgui PUBLIC
 
 # ---------- ENGINE ----------
 add_library(engine
+    engine/src/AppSetup.cpp
     engine/src/Camera.cpp
     engine/src/Cubemap.cpp
     engine/src/EBO.cpp
