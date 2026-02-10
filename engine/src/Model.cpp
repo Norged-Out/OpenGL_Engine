@@ -284,6 +284,10 @@ void Model::attachTextures(std::vector<std::shared_ptr<Texture>>& textures,
 
 void Model::generateTangents(std::vector<Vertex>& vertices,
     const std::vector<GLuint>& indices) {
+    // Reset tangents
+    for (auto& v : vertices) {
+        v.tangent = glm::vec4(0.0f);
+    }
     // Per-triangle tangent accumulation 
     for (size_t i = 0; i < indices.size(); i += 3) {
         // Fetch the three vertices of the triangle
@@ -310,14 +314,19 @@ void Model::generateTangents(std::vector<Vertex>& vertices,
         glm::vec3 bitangent = invDet * (-deltaUV2.x * e1 + deltaUV1.x * e2);
 
         // Accumulate the tangent into each vertex of the triangle
-        v0.tangent += tangent;
-        v1.tangent += tangent;
-        v2.tangent += tangent;
+        v0.tangent += glm::vec4(tangent, 0.0f);
+        v1.tangent += glm::vec4(tangent, 0.0f);
+        v2.tangent += glm::vec4(tangent, 0.0f);
 
-        // Accumulate the bitangent as well
-        v0.tangent.w += (glm::dot(glm::cross(v0.normal, tangent), bitangent) < 0.0f) ? -1.0f : 1.0f;
-        v1.tangent.w += (glm::dot(glm::cross(v1.normal, tangent), bitangent) < 0.0f) ? -1.0f : 1.0f;
-        v2.tangent.w += (glm::dot(glm::cross(v2.normal, tangent), bitangent) < 0.0f) ? -1.0f : 1.0f;
+        // Calculate handedness (sign) for normal mapping
+        float h0 = glm::dot(glm::cross(v0.normal, tangent), bitangent) < 0.0f ? -1.0f : 1.0f;
+        float h1 = glm::dot(glm::cross(v1.normal, tangent), bitangent) < 0.0f ? -1.0f : 1.0f;
+        float h2 = glm::dot(glm::cross(v2.normal, tangent), bitangent) < 0.0f ? -1.0f : 1.0f;
+
+        // Accumulate handedness into the w component of the tangent
+        v0.tangent.w += h0;
+        v1.tangent.w += h1;
+        v2.tangent.w += h2;
     }
     // Per-vertex normalization & orthogonalization
     for (auto& v : vertices) {
