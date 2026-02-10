@@ -10,7 +10,7 @@ struct Vertex
 	glm::vec3 normal;
 	glm::vec3 color;
 	glm::vec2 texUV;
-	glm::vec3 tangent;
+	glm::vec4 tangent; // xyz = tangent, w = handedness
 };
 
 class VBO

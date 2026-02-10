@@ -20,8 +20,8 @@ Mesh::Mesh(const std::vector <Vertex>& vert,
 	vao.LinkVBO(vbo, 2, 3, sizeof(Vertex), (void*)(6 * sizeof(float)));
 	// link texture coordinates (2 floats, start after first 9)
 	vao.LinkVBO(vbo, 3, 2, sizeof(Vertex), (void*)(9 * sizeof(float)));
-	// link tangent (3 floats, start after first 11)
-	vao.LinkVBO(vbo, 4, 3, sizeof(Vertex), (void*)(11 * sizeof(float)));
+	// link tangent (4 floats, start after first 11)
+	vao.LinkVBO(vbo, 4, 4, sizeof(Vertex), (void*)(11 * sizeof(float)));
 
 	// unbind to prevent accidental modification
 	vao.Unbind(); vbo.Unbind(); ebo.Unbind();

@@ -306,20 +306,28 @@ void Model::generateTangents(std::vector<Vertex>& vertices,
 
         // Compute the tangent vector for this triangle
         glm::vec3 tangent = invDet * (deltaUV2.y * e1 - deltaUV1.y * e2);
+        // Compute the bitangent as well
+        glm::vec3 bitangent = invDet * (-deltaUV2.x * e1 + deltaUV1.x * e2);
 
         // Accumulate the tangent into each vertex of the triangle
         v0.tangent += tangent;
         v1.tangent += tangent;
         v2.tangent += tangent;
+
+        // Accumulate the bitangent as well
+        v0.tangent.w += (glm::dot(glm::cross(v0.normal, tangent), bitangent) < 0.0f) ? -1.0f : 1.0f;
+        v1.tangent.w += (glm::dot(glm::cross(v1.normal, tangent), bitangent) < 0.0f) ? -1.0f : 1.0f;
+        v2.tangent.w += (glm::dot(glm::cross(v2.normal, tangent), bitangent) < 0.0f) ? -1.0f : 1.0f;
     }
     // Per-vertex normalization & orthogonalization
     for (auto& v : vertices) {
         // Skip vertices that never received tangent data
         if (glm::length(v.tangent) == 0.0f) continue;
+        glm::vec3 t(v.tangent);
         // Gram-Schmidt orthogonalize tangent with respect to normal
-        v.tangent = glm::normalize(
-            v.tangent - v.normal * glm::dot(v.normal, v.tangent)
-        );
+        t = glm::normalize(t - v.normal * glm::dot(v.normal, t));
+        float handedness = (v.tangent.w < 0.0f) ? -1.0f : 1.0f; // sign
+        v.tangent = glm::vec4(t, handedness);
     }
 }
 
@@ -352,9 +360,14 @@ std::shared_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
         // Optional: Tangent
         if (mesh->HasTangentsAndBitangents())
-            vertex.tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
+            vertex.tangent = glm::vec4(
+                mesh->mTangents[i].x,
+                mesh->mTangents[i].y,
+                mesh->mTangents[i].z,
+                1.0f
+            );
         else
-            vertex.tangent = glm::vec3(0.0f);
+            vertex.tangent = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); // Default tangent
 
         vertices.push_back(vertex);
     }
