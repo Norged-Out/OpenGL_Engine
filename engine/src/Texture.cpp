@@ -113,9 +113,6 @@ void Texture::texUnit(Shader& shader, const char* uniform, GLuint unit) {
 	shader.Activate();
 	// Sets the value of the uniform
 	glUniform1i(texUni, unit);
-	std::cout << "[Texture::texUnit] uniform "
-          << uniform << " location = "
-          << texUni << "\n";
 }
 
 void Texture::Bind() {
@@ -126,9 +123,6 @@ void Texture::Bind() {
 void Texture::Bind(GLuint unit) {
 	glActiveTexture(GL_TEXTURE0 + unit);
 	glBindTexture(GL_TEXTURE_2D, ID);
-
-	std::cout << "[Texture::Bind] ID=" << ID
-              << " bound to unit " << unit << "\n";
 }
 
 void Texture::Unbind() {

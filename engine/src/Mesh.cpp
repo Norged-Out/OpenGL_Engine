@@ -2,7 +2,6 @@
 #include "engine/Shader.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <string>
-#include <iostream>
 
 // Constructor that generates a Mesh, need to initialze vbo and ebo
 Mesh::Mesh(const std::vector <Vertex>& vert, 
@@ -53,22 +52,13 @@ void Mesh::setScale(const glm::vec3& scale) {
 }
 
 void Mesh::Draw(Shader& shader) {
-	std::cout << "\n[Mesh::Draw] Drawing mesh with "
-          << textures.size() << " textures\n";
 	// bind textures in order
 	for (auto& tex : textures) {
         GLuint slot;
         std::string uniform;
-		std::cout << "[Mesh::Draw] Texture semantic = "
-              << tex->type << "\n";
 
-        if (!tex->getTextureSlot(tex->type, slot, uniform)){
-			std::cout << "  -> NO SLOT MAPPING FOUND\n";
-			continue;
-		}
-        std::cout << "  -> uniform = " << uniform
-              << ", slot = " << slot << "\n";
-			  
+        if (!tex->getTextureSlot(tex->type, slot, uniform)) continue;
+
         tex->texUnit(shader, uniform.c_str(), slot);
         tex->Bind(slot);
     }

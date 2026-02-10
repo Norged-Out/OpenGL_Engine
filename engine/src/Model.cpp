@@ -179,17 +179,10 @@ std::shared_ptr<Texture> Model::loadTexture(const aiString& path,
     std::shared_ptr<Texture> tex;
     const char* cpath = path.C_Str();
 
+    // embedded texture
     if (cpath[0] == '*') {
         std::cout << "[Texture] Embedded texture detected: "
             << key << "\n";
-    }
-    else {
-        std::cout << "[Texture] External texture detected: "
-            << directory << "/" << key << "\n";
-    }
-
-    // embedded texture
-    if (cpath[0] == '*') {
         int idx = std::atoi(cpath + 1);
         const aiTexture* aiTex = scene->mTextures[idx];
 
@@ -201,6 +194,8 @@ std::shared_ptr<Texture> Model::loadTexture(const aiString& path,
     }
     // external texture
     else {
+        std::cout << "[Texture] External texture detected: "
+            << directory << "/" << key << "\n";
         std::string fullPath = directory + "/" + cpath;
         tex = std::make_shared<Texture>(fullPath.c_str(), typeName, slot, GL_UNSIGNED_BYTE);
     }
