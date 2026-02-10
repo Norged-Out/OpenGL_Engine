@@ -10,6 +10,10 @@ enum class RotationOrder {
 
 class MathUtils {
 public:
+    // Build a transformation matrix from position, rotation (axis-angle), and scale
+    static glm::mat4 buildTRS(const glm::vec3& pos,
+                              const glm::vec3& rotAxis, float rotAngle,
+                              const glm::vec3& scale);
     // Euler (degrees) to Quaternion with explicit order
     static glm::quat eulerToQuat(float pitchDeg, float yawDeg, float rollDeg,
                                  RotationOrder order);

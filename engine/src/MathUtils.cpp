@@ -1,6 +1,17 @@
 #include "engine/MathUtils.h"
 #include <algorithm> // for std::clamp
 
+// Build a transformation matrix from position, rotation (axis-angle), and scale
+glm::mat4 MathUtils::buildTRS(const glm::vec3& pos,
+    const glm::vec3& rotAxis, float rotAngle,
+    const glm::vec3& scale) {
+    glm::mat4 M(1.0f);
+    M = glm::translate(M, pos);
+    M = glm::rotate(M, rotAngle, rotAxis);
+    M = glm::scale(M, scale);
+    return M;
+}
+
 // Euler angles (degrees) to quaternion with explicit order
 glm::quat MathUtils::eulerToQuat(float pitchDeg, float yawDeg, float rollDeg,
                                  RotationOrder order) {
