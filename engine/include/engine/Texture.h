@@ -19,11 +19,10 @@ class Texture
 {
 public:
 	GLuint ID;
-	const char* type;
 	GLuint slot;
-	Texture(const char* image, const char* texType, GLuint slot, GLenum pixelType);
+	Texture(const char* image, GLuint slot, GLenum pixelType);
 	// for embedded textures:
-	Texture(const unsigned char* data, size_t size, const char* texType, GLuint slot, GLenum pixelType);
+	Texture(const unsigned char* data, size_t size, GLuint slot, GLenum pixelType);
 
 	~Texture() {
 		if (ID != 0) Delete();

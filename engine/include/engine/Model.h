@@ -12,6 +12,7 @@
 #include "engine/Mesh.h"
 #include "engine/MathUtils.h"
 class Shader;
+class Texture;
 
 class Model
 {
