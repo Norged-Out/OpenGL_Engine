@@ -2,22 +2,181 @@
 
 A personal, reusable OpenGL engine scaffold built to support multiple coursework projects without copy-pasting boilerplate every time.
 
-This repository is intended to be used as a **vendored engine** (via `add_subdirectory` or Git submodules), not as a system-installed library.
+This repository builds a reusable rendering **library**, not an executable.  
+It is intended to be used as a **vendored engine** by being included in projects via `add_subdirectory` or Git submodules.
 
 ---
 
 ## Features
 
-- Modern OpenGL setup
+- Modern OpenGL rendering pipeline
 - Reusable engine core (no `main()` in this repo)
+- Procedural geometry (cube, sphere, pyramid, ring, plane)
 - Model loading via Assimp (OBJ / FBX / glTF / GLB)
-- Windowing via GLFW
-- Math via GLM
-- UI via Dear ImGui (GLFW + OpenGL3 backend)
-- Texture loading via stb_image
-- Skybox rendering using custom HDRI converter and stb_image
+- PBR-style material system
+- Texture system with runtime filtering + wrapping control
+- Skybox rendering using custom HDRI to Cubemap converter and stb_image
+- Camera system (free + cinematic modes)
+- UI integration via Dear ImGui (GLFW + OpenGL3 backend)
 - Clean CMake target boundaries
-- No package manager required
+- Fully vendored dependencies (no package manager required)
+
+---
+
+## Core Architecture
+
+The engine is structured around a strict separation of responsibilities.  
+Each system owns a clearly defined part of the rendering pipeline.
+
+---
+
+### Rendering Layer
+
+#### Shader
+Encapsulates an OpenGL shader program.
+
+Responsible for:
+- Compilation and linking
+- Program activation
+- Uniform uploads
+
+Contains no scene logic and owns only the GPU program object.
+
+---
+
+#### VBO (Vertex Buffer Object)
+Wraps a GPU vertex buffer.
+
+Responsible for:
+- Uploading vertex data
+- Binding/unbinding
+
+Does not know about vertex semantics.
+
+---
+
+#### EBO (Element Buffer Object)
+Wraps GPU index buffer storage.
+
+Responsible for:
+- Uploading index data
+- Binding/unbinding
+
+---
+
+#### VAO (Vertex Array Object)
+Stores vertex attribute layout configuration.
+
+Responsible for:
+- Linking VBO attribute layouts
+- Preserving vertex format state
+
+Separates geometry data from layout description.
+
+---
+
+### Scene Layer
+
+#### Mesh
+Represents drawable geometry.
+
+Owns:
+- Vertex data
+- Index data
+- VAO / VBO / EBO
+- Optional Material reference
+
+Does **not** own:
+- World transform
+- Texture semantics
+- Scene logic
+
+Mesh is purely a renderable unit.
+
+---
+
+#### Material
+Defines surface appearance.
+
+Maps semantic identifiers (e.g., `"diffuse"`, `"normal"`, `"roughness"`) to textures and handles texture binding during draw calls.
+
+Contains no geometry and no transform data.
+
+---
+
+#### Texture
+Encapsulates an OpenGL texture resource.
+
+Responsible for:
+- GPU allocation
+- Image upload
+- Mipmap generation
+- Filtering state
+- Wrapping state
+
+Textures are semantic-agnostic — they do not know how they will be used.
+
+---
+
+#### Model
+High-level scene object.
+
+Owns:
+- Transform state (position, rotation, scale)
+- Collection of meshes
+- Texture cache for loaded assets
+
+Combines its transform with mesh data during rendering.
+
+---
+
+### Utility Layer
+
+#### MathUtils
+Provides:
+- Deterministic TRS matrix construction
+- Quaternion helpers
+- Rotation order control
+
+Used for explicit transform construction rather than hidden matrix logic.
+
+#### Geometry
+Provides:
+- Procedural mesh generation (Cube, Pyramid, Sphere, Ring, Plane)
+- Tangent computation for normal mapping
+
+Encapsulates reusable primitive construction separate from rendering and scene logic.
+
+---
+
+#### Camera
+Encapsulates:
+- View matrix construction
+- Projection matrix configuration
+- Input handling (free/cinematic modes)
+- Matrix export to shaders
+
+Defines how the scene is viewed, but does not modify scene objects.
+
+---
+
+## Architectural Principles
+
+- Clear ownership boundaries
+- No hidden global state
+- No implicit texture slot conventions
+- Mesh does not store transform logic
+- Texture does not store semantic meaning
+- Model aggregates transforms
+- Rendering state changes are explicit
+
+This structure enables:
+
+- Clean instancing
+- Safer refactoring
+- Runtime texture sampling control (mipmapping demonstrations)
+- Stable engine updates across coursework projects
+- Predictable rendering behavior
 
 ---
 
@@ -64,12 +223,12 @@ This repository builds **only a library**, not an executable.
 
 ### Submodule per Project (Best for Coursework)
 
-Each project/assignment includes the engine as a **Git submodule**.
+Each project includes the engine as a **Git submodule**.
 
 Example layout:
 ```
-Assignment1/
-├── OpenGL_Engine/ ← submodule
+Project/
+├── OpenGL_Engine/  (submodule)
 ├── CMakeLists.txt
 └── src/
 ```
@@ -85,7 +244,7 @@ git submodule add https://github.com/Norged-Out/OpenGL_Engine.git OpenGL_Engine
 
 ```cmake
 cmake_minimum_required(VERSION 3.20)
-project(Assignment1)
+project(Project)
 set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(OpenGL_Engine)
@@ -96,14 +255,14 @@ add_executable(app
 
 target_link_libraries(app PRIVATE engine)
 
-# Assignment-specific asset root
+# project-specific asset root
 target_compile_definitions(app PRIVATE
     ENGINE_ASSET_ROOT="${CMAKE_SOURCE_DIR}"
 )
 ```
 ### Important:
 Do not modify engine targets from the consumer project.
-All configuration that varies per assignment should apply to the app target, not ```engine```.
+All configuration that varies per project should apply to the app target, not ```engine```.
 
 ---
 
@@ -119,6 +278,9 @@ add_custom_command(TARGET app POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/Models
         $<TARGET_FILE_DIR:app>/Models
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/Textures
+        $<TARGET_FILE_DIR:app>/Textures
 )
 ```
 
@@ -136,7 +298,7 @@ git add OpenGL_Engine
 git commit -m "Update OpenGL_Engine"
 ```
 
-Each project pins its own engine version to avoid breaking older assignments.
+Each project pins its own engine version to avoid breaking older projects.
 
 ---
 
@@ -154,22 +316,29 @@ No package manager or toolchain file is required.
 
 - Prefer explicit vendoring over global dependencies
 - Favor reproducibility over convenience
-- Engine code must not assume project layout
-- Consumer projects configure behavior via compile definitions
+- Clear ownership boundaries between systems
+- No implicit texture slot conventions
 - No hidden include paths
-- No global state
+- No global rendering state
+- Engine code must not assume consumer project layout
+- Consumer projects configure behavior via compile definitions
 
 ---
 
 ## Non-Goals
 
-- This engine is not intended to be installed system-wide
-- This engine is not a framework
-- This engine does not provide a default application entry point
-- This engine is not optimized for distribution
+- Not intended to be installed system-wide
+- Not a general-purpose game engine
+- Does not provide a default application entry point
+- Does not include a scene editor
+- Does not include a runtime asset pipeline
+- Not optimized for distribution or commercial deployment
 
 ---
 
 ## License
 
-Personal/educational use.
+Personal / educational use.
+## License
+
+Personal / educational use.
