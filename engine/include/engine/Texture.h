@@ -2,28 +2,15 @@
 
 #include <glad/glad.h>
 #include <string>
-class Shader;
-
-// TODO: Texture should not own slot or semantic.
-//       Move binding policy to Material/Mesh.
-enum class TextureSlot {
-    Diffuse  = 0,
-    Specular = 1,
-    Normal   = 2,
-    Roughness= 3,
-    Metallic = 4,
-    AO       = 5
-};
 
 class Texture
 {
 public:
-	GLuint ID;
-	const char* type;
-	GLuint slot;
-	Texture(const char* image, const char* texType, GLuint slot, GLenum pixelType);
-	// for embedded textures:
-	Texture(const unsigned char* data, size_t size, const char* texType, GLuint slot, GLenum pixelType);
+	GLuint ID = 0;
+	// Constructor for loading from file
+	Texture(const char* imagePath, GLenum pixelType);
+	// Constructor for embedded textures loaded from memory
+	Texture(const unsigned char* data, size_t size, GLenum pixelType);
 
 	~Texture() {
 		if (ID != 0) Delete();
@@ -33,26 +20,28 @@ public:
 	Texture(const Texture&) = delete;
 	Texture& operator=(const Texture&) = delete;
 
-	// Assigns a texture unit to a texture
-	void texUnit(Shader& shader, const char* uniform, GLuint unit);
-	// Binds a texture
-	void Bind(); // Bind to existing texture unit
-	void Bind(GLuint unit); // Bind to a specific texture unit
+	// Bind to currently active texture unit
+	void Bind(); 
+	// Bind to a specific texture unit
+	void Bind(GLuint unit); 
 	// Unbinds a texture
 	void Unbind();
 	// Deletes a texture
 	void Delete();
 
-	// Helper function to map texture semantic to fixed slot + uniform
-	static inline bool getTextureSlot(const std::string& type, GLuint& outSlot,
-		std::string& uniform){
-		if (type == "diffuse")   { outSlot = 0; uniform = "diffuse0"; }
-		else if (type == "specular") { outSlot = 1; uniform = "specular0"; }
-		else if (type == "normal")   { outSlot = 2; uniform = "normal0"; }
-		else if (type == "roughness"){ outSlot = 3; uniform = "roughness0"; }
-		else if (type == "metallic") { outSlot = 4; uniform = "metallic0"; }
-		else if (type == "ao")       { outSlot = 5; uniform = "ao0"; }
-		else return false;
-		return true;
-	}
+	// Setters for texture parameters
+	void setFiltering(GLenum newMin, GLenum newMag);
+	void setWrapping(GLenum newWrapS, GLenum newWrapT);
+
+    // Optional getters
+    GLenum getMinFilter() const { return minFilter; }
+    GLenum getMagFilter() const { return magFilter; }
+    GLenum getWrapS() const { return wrapS; }
+    GLenum getWrapT() const { return wrapT; }
+
+private:
+	GLenum minFilter = GL_LINEAR_MIPMAP_LINEAR;
+	GLenum magFilter = GL_LINEAR;
+	GLenum wrapS = GL_REPEAT;
+	GLenum wrapT = GL_REPEAT;
 };

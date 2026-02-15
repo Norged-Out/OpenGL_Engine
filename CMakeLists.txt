@@ -89,6 +89,7 @@ add_library(engine
     engine/src/Geometry.cpp
     engine/src/HDRConverter.cpp
     engine/src/HDRTexture.cpp
+    engine/src/Material.cpp
     engine/src/MathUtils.cpp
     engine/src/Mesh.cpp
     engine/src/Model.cpp

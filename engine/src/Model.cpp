@@ -1,28 +1,22 @@
 #include "engine/Model.h"
 #include "engine/Shader.h"
+#include "engine/Mesh.h"
+#include "engine/Material.h"
 #include "engine/Texture.h"
 #include "engine/Geometry.h"
-#include <iostream>
-#include <cmath>
-#include <glm/gtc/matrix_transform.hpp>
-#include <assimp/texture.h>
+
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <assimp/texture.h>
 
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <filesystem>
 #include <algorithm>
+#include <iostream>
+#include <cmath>
 namespace fs = std::filesystem;
-
-// helper to extract model path
-static std::string getModelDirectory(const std::string& modelPath) {
-    size_t lastSlash = modelPath.find_last_of("/\\");
-    if (lastSlash != std::string::npos) {
-        return modelPath.substr(0, lastSlash + 1);
-    }
-    return "";  // Model in current directory
-}
 
 // Constructor to load model
 Model::Model(const std::string& path) {
@@ -61,13 +55,20 @@ void Model::Draw(Shader& shader) {
     glm::mat4 computedMatrix = getModelMatrix();  // Compute TRS from components
     // draws each mesh onto scene
     for (auto& mesh : meshes) {
-        // combine model transform with mesh
-        glm::mat4 finalMatrix = computedMatrix * mesh->getModelMatrix();
-        // export the finalMatrix to the Vertex Shader of model
-        shader.setMat4("model", finalMatrix);
+        // export the model matrix to the Vertex Shader of model
+        shader.setMat4("model", computedMatrix);
         // issue the actual draw for this mesh
         mesh->Draw(shader);
     }
+}
+
+// helper to extract model path
+static std::string getModelDirectory(const std::string& modelPath) {
+    size_t lastSlash = modelPath.find_last_of("/\\");
+    if (lastSlash != std::string::npos) {
+        return modelPath.substr(0, lastSlash + 1);
+    }
+    return "";  // Model in current directory
 }
 
 void Model::loadModel(const std::string& path) {
@@ -168,10 +169,9 @@ static std::string findFirstMatchingTexture(
     return "";
 }
 
-std::shared_ptr<Texture> Model::loadTexture(const aiString& path,
-    const char* typeName, const aiScene* scene, GLuint slot) {
+std::shared_ptr<Texture> Model::loadTexture(const aiString& path, const aiScene* scene) {
     // Cache key includes semantic to avoid collisions
-    std::string key = std::string(typeName) + ":" + path.C_Str();
+    std::string key = path.C_Str();
 
     // cache hit
     auto it = textureCache.find(key);
@@ -192,21 +192,21 @@ std::shared_ptr<Texture> Model::loadTexture(const aiString& path,
             reinterpret_cast<const unsigned char*>(aiTex->pcData);
 
         size_t size = aiTex->mWidth; // slot will be ignored
-        tex = std::make_shared<Texture>(bytes, size, typeName, slot, GL_UNSIGNED_BYTE);
+        tex = std::make_shared<Texture>(bytes, size, GL_UNSIGNED_BYTE);
     }
     // external texture
     else {
         std::cout << "[Texture] External texture detected: "
             << directory << "/" << key << "\n";
         std::string fullPath = directory + "/" + cpath;
-        tex = std::make_shared<Texture>(fullPath.c_str(), typeName, slot, GL_UNSIGNED_BYTE);
+        tex = std::make_shared<Texture>(fullPath.c_str(), GL_UNSIGNED_BYTE);
     }
 
     textureCache[key] = tex;
     return tex;
 }
 
-void Model::attachTextures(std::vector<std::shared_ptr<Texture>>& textures,
+void Model::attachTextures(std::shared_ptr<Material> materialObj,
     aiMaterial* material, const aiScene* scene) {
     std::cout << "\n[Material] Processing material\n";
     
@@ -230,19 +230,20 @@ void Model::attachTextures(std::vector<std::shared_ptr<Texture>>& textures,
         { aiTextureType_AMBIENT_OCCLUSION, "ao" }
     };
 
-    // Prevent duplicate semantics (one texture per type)
-    auto hasType = [&](const char* type) {
-        return std::any_of(textures.begin(), textures.end(),
-            [&](const std::shared_ptr<Texture>& t) {
-                return std::strcmp(t->type, type) == 0;
-            });
-    };
+    bool loadedAny = false;
 
-	// Load with Assimp material textures
+    // Prevent duplicate semantics (one texture per type)
+    // auto hasType = [&](const char* type) {
+    //     return std::any_of(textures.begin(), textures.end(),
+    //         [&](const std::shared_ptr<Texture>& t) {
+    //             return std::strcmp(t->type, type) == 0;
+    //         });
+    // };
+
+	// Load textures defined in the Assimp material
     for (const auto& pair : types) {
         aiTextureType type = pair.first;
-        const char* name = pair.second;
-        if (hasType(name)) continue;
+        const char* semantic = pair.second;
 
         for (unsigned i = 0; i < material->GetTextureCount(type); ++i) {
             aiString path;
@@ -250,27 +251,26 @@ void Model::attachTextures(std::vector<std::shared_ptr<Texture>>& textures,
 
             std::cout << "[Material] Requested texture: \""
                 << path.C_Str()
-                << "\" (type = " << name << ")\n";
+                << "\" (type = " << semantic << ")\n";
 
-            auto tex = loadTexture(path, name, scene, 0);
-            textures.push_back(tex);
+            auto tex = loadTexture(path, scene);
+            materialObj->setTexture(semantic, tex);
+            loadedAny = true;
         }
     }
 
-	// Fallback to forced textures if none loaded
-    if (textures.empty() && scene->mNumTextures == 0) {
+	// Fallback if no material textures were found
+    if (!loadedAny && scene->mNumTextures == 0) {
         std::cout << "[Texture] No material textures; trying fallback folder\n";
 
         auto tryAdd = [&](const char* semantic,
                           const std::vector<std::string>& hints)
         {
-            if (hasType(semantic)) return;
             std::string file = findFirstMatchingTexture(texturesDir, hints);
             if (!file.empty()) {
                 std::cout << "[Texture] Fallback " << semantic << ": "
                           << file << "\n";
-                textures.push_back(std::make_shared<Texture>(
-                    file.c_str(), semantic, 0, GL_UNSIGNED_BYTE));
+                materialObj->setTexture(semantic, std::make_shared<Texture>(file.c_str(), GL_UNSIGNED_BYTE));
             }
         };
 
@@ -286,7 +286,8 @@ void Model::attachTextures(std::vector<std::shared_ptr<Texture>>& textures,
 std::shared_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     std::vector<Vertex> vertices;
     std::vector<GLuint> indices;
-    std::vector<std::shared_ptr<Texture>> textures;
+    //std::vector<std::shared_ptr<Texture>> textures;
+    auto materialObj = std::make_shared<Material>();
 
     // extract vertex data
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
@@ -335,7 +336,7 @@ std::shared_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     // process textures
     if (mesh->mMaterialIndex >= 0) {
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        attachTextures(textures, material, scene);
+        attachTextures(materialObj, material, scene);
     }
 
     // generate tangents manually if not provided but UVs exist
@@ -344,5 +345,5 @@ std::shared_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     }
 
     // construct Mesh in place once and transfer ownership into Model
-    return std::make_shared<Mesh>(vertices, indices, textures);
+    return std::make_shared<Mesh>(vertices, indices, materialObj);
 }

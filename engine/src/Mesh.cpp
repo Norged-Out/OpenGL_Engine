@@ -4,10 +4,10 @@
 #include <string>
 
 // Constructor that generates a Mesh, need to initialze vbo and ebo
-Mesh::Mesh(const std::vector <Vertex>& vert, 
+Mesh::Mesh(const std::vector <Vertex>& verts, 
 			const std::vector <GLuint>& inds, 
-			const std::vector<std::shared_ptr<Texture>>& texs)
-	: vertices(vert), indices(inds), textures(texs), 
+			std::shared_ptr<Material> mat)
+	: vertices(verts), indices(inds), material(mat),
 	vbo(vertices.data(), vertices.size() * sizeof(Vertex)), ebo(indices) {
 	// bind vao since default constructor is already called
 	vao.Bind();
@@ -28,49 +28,15 @@ Mesh::Mesh(const std::vector <Vertex>& vert,
 	vao.Unbind(); vbo.Unbind(); ebo.Unbind();
 }
 
-void Mesh::setModelMatrix(const glm::mat4& m) {
-	modelMatrix = m;
-}
-
-const glm::mat4& Mesh::getModelMatrix() const {
-	return modelMatrix;
-}
-
-void Mesh::resetTransform() {
-	modelMatrix = glm::mat4(1.0f);
-}
-
-void Mesh::setPosition(const glm::vec3& pos) {
-	modelMatrix = glm::translate(glm::mat4(1.0f), pos);
-}
-
-void Mesh::setRotation(float angle, const glm::vec3& axis) {
-	modelMatrix = glm::rotate(modelMatrix, glm::radians(angle), axis);
-}
-
-void Mesh::setScale(const glm::vec3& scale) {
-	modelMatrix = glm::scale(modelMatrix, scale);
-}
-
-void Mesh::setTextures(const std::vector<std::shared_ptr<Texture>>& texs) {
-    textures = texs;
-}
-
 void Mesh::Draw(Shader& shader) {
-	// bind textures in order
-	for (auto& tex : textures) {
-        GLuint slot;
-        std::string uniform;
+    // Ask material to bind all textures
+    if (material) material->bind(shader);
 
-        if (!tex->getTextureSlot(tex->type, slot, uniform)) continue;
-
-        tex->texUnit(shader, uniform.c_str(), slot);
-        tex->Bind(slot);
-    }
-
-	// Draw the actual mesh
-	vao.Bind();
-	glDrawElements(drawMode, indices.size(), GL_UNSIGNED_INT, 0);
-	vao.Unbind();
-
+    // Draw the actual mesh
+    vao.Bind();
+    glDrawElements(drawMode,
+                   static_cast<GLsizei>(indices.size()),
+                   GL_UNSIGNED_INT,
+                   0);
+    vao.Unbind();
 }

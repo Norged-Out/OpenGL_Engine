@@ -7,7 +7,7 @@
 #include "engine/VBO.h"
 #include "engine/VAO.h"
 #include "engine/EBO.h"
-#include "engine/Texture.h"
+#include "engine/Material.h"
 class Shader;
 
 struct Vertex
@@ -22,9 +22,10 @@ struct Vertex
 class Mesh
 {
 public:
-	std::vector <Vertex> vertices;
-	std::vector <GLuint> indices;
-	std::vector<std::shared_ptr<Texture>> textures;
+	std::vector<Vertex> vertices;
+	std::vector<GLuint> indices;
+	std::shared_ptr<Material> material; // one material per mesh for simplicity
+
 	// Store model matrix for simple transformations
 	glm::mat4 modelMatrix = glm::mat4(1.0f);
 	GLenum drawMode = GL_TRIANGLES; // default, but can be changed per mesh
@@ -32,7 +33,7 @@ public:
 	// Initializes the mesh
 	Mesh(const std::vector <Vertex>& vertices,
 		 const std::vector <GLuint>& indices,
-		 const std::vector<std::shared_ptr<Texture>>& textures);
+		 std::shared_ptr<Material> material = nullptr);
 
 	~Mesh() {
 		vao.Delete();
@@ -40,14 +41,8 @@ public:
 		ebo.Delete();
 	}
 
-	// simple helpers
-	void setModelMatrix(const glm::mat4& m);
-	const glm::mat4& getModelMatrix() const;
-	void resetTransform();
-	void setPosition(const glm::vec3& pos);
-	void setRotation(float angle, const glm::vec3& axis);
-	void setScale(const glm::vec3& scale);
-	void setTextures(const std::vector<std::shared_ptr<Texture>>& texs);
+	// Allows changing the material after creation
+	void setMaterial(std::shared_ptr<Material> mat) { material = mat; }
 
 	// Draws the mesh
 	void Draw(Shader& shader);

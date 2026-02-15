@@ -1,19 +1,26 @@
 #pragma once
 
+
 #include <string>
 #include <vector>
 #include <unordered_map>
 #include <memory>
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
+#include <limits>
 #include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp> 
-#include "engine/Mesh.h"
+#include <glm/gtc/quaternion.hpp>
 #include "engine/MathUtils.h"
 
 class Shader;
+class Mesh;
 class Texture;
+class Material;
+
+// Forward declare Assimp structs
+struct aiScene;
+struct aiNode;
+struct aiMesh;
+struct aiMaterial;
+struct aiString;
 
 class Model
 {
@@ -79,8 +86,7 @@ private:
     std::shared_ptr<Mesh> processMesh(aiMesh* mesh, const aiScene* scene);
     
 	// Texture loading
-    std::shared_ptr<Texture> loadTexture(const aiString& path,
-        const char* typeName, const aiScene* scene,GLuint slot);
-    void attachTextures(std::vector<std::shared_ptr<Texture>>& textures,
+    std::shared_ptr<Texture> loadTexture(const aiString& path, const aiScene* scene);
+    void attachTextures(std::shared_ptr<Material> materialObj,
         aiMaterial* material, const aiScene* scene);
 };

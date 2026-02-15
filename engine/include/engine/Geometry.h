@@ -16,9 +16,6 @@ namespace Geometry {
     // Creates a simple cube mesh (positions, indices, normals, UVs, tangents)
     std::unique_ptr<Mesh> createCubeMesh();
 
-    // Creates a simple plane mesh (positions, indices, normals, UVs, tangents)
-    std::unique_ptr<Mesh> createPlaneMesh();
-
     // Creates a simple pyramid mesh (positions, indices, normals, UVs, tangents)
     std::unique_ptr<Mesh> createPyramidMesh();
 
@@ -26,7 +23,10 @@ namespace Geometry {
     std::unique_ptr<Mesh> createSphereMesh(int stacks = 16, int slices = 24);
 
     // Creates a Donut-shaped ring mesh (positions, indices, normals, UVs, tangents)
-    std::unique_ptr<Mesh> createRingMesh();
+    std::unique_ptr<Mesh> createRingMesh();    
+
+    // Creates a simple plane mesh
+    std::unique_ptr<Mesh> createPlaneMesh(float width = 1.0f, float height = 1.0f, float uvScale = 1.0f);
 
     // -------- Tangent utilities --------
 

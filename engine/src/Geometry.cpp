@@ -4,47 +4,68 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-std::unique_ptr<Mesh> Geometry::createCubeMesh() {
+std::unique_ptr<Mesh> Geometry::createCubeMesh()
+{
     std::vector<Vertex> vertices = {
-        // +Z
+
+        // +Z (Front)
         {{-0.5f,-0.5f, 0.5f},{0,0,1},{1,1,1},{0,0}},
         {{ 0.5f,-0.5f, 0.5f},{0,0,1},{1,1,1},{1,0}},
         {{ 0.5f, 0.5f, 0.5f},{0,0,1},{1,1,1},{1,1}},
         {{-0.5f, 0.5f, 0.5f},{0,0,1},{1,1,1},{0,1}},
-        // -Z
+
+        // -Z (Back)
         {{ 0.5f,-0.5f,-0.5f},{0,0,-1},{1,1,1},{0,0}},
         {{-0.5f,-0.5f,-0.5f},{0,0,-1},{1,1,1},{1,0}},
         {{-0.5f, 0.5f,-0.5f},{0,0,-1},{1,1,1},{1,1}},
         {{ 0.5f, 0.5f,-0.5f},{0,0,-1},{1,1,1},{0,1}},
+
+        // +X (Right) 
+        {{ 0.5f,-0.5f, 0.5f},{1,0,0},{1,1,1},{0,0}},
+        {{ 0.5f,-0.5f,-0.5f},{1,0,0},{1,1,1},{1,0}},
+        {{ 0.5f, 0.5f,-0.5f},{1,0,0},{1,1,1},{1,1}},
+        {{ 0.5f, 0.5f, 0.5f},{1,0,0},{1,1,1},{0,1}},
+
+        // -X (Left) 
+        {{-0.5f,-0.5f,-0.5f},{-1,0,0},{1,1,1},{0,0}},
+        {{-0.5f,-0.5f, 0.5f},{-1,0,0},{1,1,1},{1,0}},
+        {{-0.5f, 0.5f, 0.5f},{-1,0,0},{1,1,1},{1,1}},
+        {{-0.5f, 0.5f,-0.5f},{-1,0,0},{1,1,1},{0,1}},
+
+        // +Y (Top)
+        {{-0.5f, 0.5f, 0.5f},{0,1,0},{1,1,1},{0,0}},
+        {{ 0.5f, 0.5f, 0.5f},{0,1,0},{1,1,1},{1,0}},
+        {{ 0.5f, 0.5f,-0.5f},{0,1,0},{1,1,1},{1,1}},
+        {{-0.5f, 0.5f,-0.5f},{0,1,0},{1,1,1},{0,1}},
+
+        // -Y (Bottom)
+        {{-0.5f,-0.5f,-0.5f},{0,-1,0},{1,1,1},{0,0}},
+        {{ 0.5f,-0.5f,-0.5f},{0,-1,0},{1,1,1},{1,0}},
+        {{ 0.5f,-0.5f, 0.5f},{0,-1,0},{1,1,1},{1,1}},
+        {{-0.5f,-0.5f, 0.5f},{0,-1,0},{1,1,1},{0,1}},
     };
 
-    std::vector<GLuint> indices = {
-        0,1,2, 0,2,3,
-        4,5,6, 4,6,7
-    };
+    std::vector<GLuint> indices;
 
-    std::vector<std::shared_ptr<Texture>> textures;
+    for (int i = 0; i < 6; ++i)
+    {
+        int start = i * 4;
+
+        indices.push_back(start + 0);
+        indices.push_back(start + 1);
+        indices.push_back(start + 2);
+
+        indices.push_back(start + 0);
+        indices.push_back(start + 2);
+        indices.push_back(start + 3);
+    }
+
     Geometry::generateTangents(vertices, indices);
+
     std::cout << "[Cube] Vertices: " << vertices.size()
-          << " | Indices: " << indices.size() << std::endl;
-    return std::make_unique<Mesh>(vertices, indices, textures);
-}
+              << " | Indices: " << indices.size() << std::endl;
 
-std::unique_ptr<Mesh> Geometry::createPlaneMesh() {
-    std::vector<Vertex> vertices = {
-        {{-0.5f,0, -0.5f},{0,1,0},{1,1,1},{0,0}},
-        {{ 0.5f,0, -0.5f},{0,1,0},{1,1,1},{1,0}},
-        {{ 0.5f,0,  0.5f},{0,1,0},{1,1,1},{1,1}},
-        {{-0.5f,0,  0.5f},{0,1,0},{1,1,1},{0,1}},
-    };
-
-    std::vector<GLuint> indices = { 0,1,2, 0,2,3 };
-
-    std::vector<std::shared_ptr<Texture>> textures;
-    Geometry::generateTangents(vertices, indices);
-    std::cout << "[Plane] Vertices: " << vertices.size()
-          << " | Indices: " << indices.size() << std::endl;
-    return std::make_unique<Mesh>(vertices, indices, textures);
+    return std::make_unique<Mesh>(vertices, indices, nullptr);
 }
 
 std::unique_ptr<Mesh> Geometry::createPyramidMesh() {
@@ -86,11 +107,10 @@ std::unique_ptr<Mesh> Geometry::createPyramidMesh() {
         13,14,15           // left
     };
 
-    std::vector<std::shared_ptr<Texture>> textures;
     Geometry::generateTangents(vertices, indices);
     std::cout << "[Pyramid] Vertices: " << vertices.size()
           << " | Indices: " << indices.size() << std::endl;
-    return std::make_unique<Mesh>(vertices, indices, textures);
+    return std::make_unique<Mesh>(vertices, indices, nullptr);
 }
 
 std::unique_ptr<Mesh> Geometry::createSphereMesh(int stacks, int slices) {
@@ -137,12 +157,11 @@ std::unique_ptr<Mesh> Geometry::createSphereMesh(int stacks, int slices) {
         }
     }
 
-    std::vector<std::shared_ptr<Texture>> textures;
     Geometry::generateTangents(vertices, indices);
     std::cout << "[Sphere] Vertices: " << vertices.size()
           << " | Indices: " << indices.size() << std::endl;
 
-    return std::make_unique<Mesh>(vertices, indices, textures);
+    return std::make_unique<Mesh>(vertices, indices, nullptr);
 }
 
 std::unique_ptr<Mesh> Geometry::createRingMesh() {
@@ -236,14 +255,50 @@ std::unique_ptr<Mesh> Geometry::createRingMesh() {
         indices.push_back((GLuint)(i1 + 3));
         indices.push_back((GLuint)i1 + 1);
     }
-
-    std::vector<std::shared_ptr<Texture>> textures;    
+   
     Geometry::generateTangents(vertices, indices);
     std::cout << "[Ring] Vertices: " << vertices.size()
           << " | Indices: " << indices.size() << std::endl;
 
-    return std::make_unique<Mesh>(vertices, indices, textures);
+    return std::make_unique<Mesh>(vertices, indices, nullptr);
 }
+
+std::unique_ptr<Mesh> Geometry::createPlaneMesh(
+    float width,
+    float depth,
+    float uvScale)
+{
+    float hw = width * 0.5f;
+    float hd = depth * 0.5f;
+
+    std::vector<Vertex> vertices = {
+
+        // Bottom-left
+        {{-hw, 0.0f, -hd}, {0,1,0}, {1,1,1}, {0.0f,      0.0f}},
+
+        // Bottom-right
+        {{ hw, 0.0f, -hd}, {0,1,0}, {1,1,1}, {uvScale,   0.0f}},
+
+        // Top-right
+        {{ hw, 0.0f,  hd}, {0,1,0}, {1,1,1}, {uvScale,   uvScale}},
+
+        // Top-left
+        {{-hw, 0.0f,  hd}, {0,1,0}, {1,1,1}, {0.0f,      uvScale}},
+    };
+
+    std::vector<GLuint> indices = {
+        0, 1, 2,
+        0, 2, 3
+    };
+
+    Geometry::generateTangents(vertices, indices);
+
+    std::cout << "[Plane] Vertices: " << vertices.size()
+              << " | Indices: " << indices.size() << std::endl;
+
+    return std::make_unique<Mesh>(vertices, indices, nullptr);
+}
+
 
 void Geometry::generateTangents(std::vector<Vertex>& vertices,
     const std::vector<GLuint>& indices) {
