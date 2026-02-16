@@ -4,10 +4,8 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-std::unique_ptr<Mesh> Geometry::createCubeMesh()
-{
+std::unique_ptr<Mesh> Geometry::createCubeMesh(bool genTangents) {
     std::vector<Vertex> vertices = {
-
         // +Z (Front)
         {{-0.5f,-0.5f, 0.5f},{0,0,1},{1,1,1},{0,0}},
         {{ 0.5f,-0.5f, 0.5f},{0,0,1},{1,1,1},{1,0}},
@@ -47,8 +45,7 @@ std::unique_ptr<Mesh> Geometry::createCubeMesh()
 
     std::vector<GLuint> indices;
 
-    for (int i = 0; i < 6; ++i)
-    {
+    for (int i = 0; i < 6; ++i){
         int start = i * 4;
 
         indices.push_back(start + 0);
@@ -60,7 +57,7 @@ std::unique_ptr<Mesh> Geometry::createCubeMesh()
         indices.push_back(start + 3);
     }
 
-    Geometry::generateTangents(vertices, indices);
+    if (genTangents) Geometry::generateTangents(vertices, indices);
 
     std::cout << "[Cube] Vertices: " << vertices.size()
               << " | Indices: " << indices.size() << std::endl;
@@ -68,7 +65,7 @@ std::unique_ptr<Mesh> Geometry::createCubeMesh()
     return std::make_unique<Mesh>(vertices, indices, nullptr);
 }
 
-std::unique_ptr<Mesh> Geometry::createPyramidMesh() {
+std::unique_ptr<Mesh> Geometry::createPyramidMesh(bool genTangents) {
     // full vertex setup
     std::vector<Vertex> vertices = {
         // base
@@ -107,13 +104,13 @@ std::unique_ptr<Mesh> Geometry::createPyramidMesh() {
         13,14,15           // left
     };
 
-    Geometry::generateTangents(vertices, indices);
+    if (genTangents) Geometry::generateTangents(vertices, indices);
     std::cout << "[Pyramid] Vertices: " << vertices.size()
           << " | Indices: " << indices.size() << std::endl;
     return std::make_unique<Mesh>(vertices, indices, nullptr);
 }
 
-std::unique_ptr<Mesh> Geometry::createSphereMesh(int stacks, int slices) {
+std::unique_ptr<Mesh> Geometry::createSphereMesh(int stacks, int slices, bool genTangents) {
     std::vector<Vertex> vertices;
     std::vector<GLuint>  indices;
     vertices.reserve((stacks + 1) * (slices + 1));
@@ -157,14 +154,14 @@ std::unique_ptr<Mesh> Geometry::createSphereMesh(int stacks, int slices) {
         }
     }
 
-    Geometry::generateTangents(vertices, indices);
+    if (genTangents) Geometry::generateTangents(vertices, indices);
     std::cout << "[Sphere] Vertices: " << vertices.size()
           << " | Indices: " << indices.size() << std::endl;
 
     return std::make_unique<Mesh>(vertices, indices, nullptr);
 }
 
-std::unique_ptr<Mesh> Geometry::createRingMesh() {
+std::unique_ptr<Mesh> Geometry::createRingMesh(bool genTangents) {
     std::vector<Vertex> vertices;
     std::vector<GLuint>  indices;
     float outerRadius = 1.7f;
@@ -256,18 +253,15 @@ std::unique_ptr<Mesh> Geometry::createRingMesh() {
         indices.push_back((GLuint)i1 + 1);
     }
    
-    Geometry::generateTangents(vertices, indices);
+    if (genTangents) Geometry::generateTangents(vertices, indices);
     std::cout << "[Ring] Vertices: " << vertices.size()
           << " | Indices: " << indices.size() << std::endl;
 
     return std::make_unique<Mesh>(vertices, indices, nullptr);
 }
 
-std::unique_ptr<Mesh> Geometry::createPlaneMesh(
-    float width,
-    float depth,
-    float uvScale)
-{
+std::unique_ptr<Mesh> Geometry::createPlaneMesh(float width, float depth,
+    float uvScale, bool genTangents) {
     float hw = width * 0.5f;
     float hd = depth * 0.5f;
 
@@ -287,11 +281,11 @@ std::unique_ptr<Mesh> Geometry::createPlaneMesh(
     };
 
     std::vector<GLuint> indices = {
-        0, 1, 2,
-        0, 2, 3
+        0, 2, 1,
+        0, 3, 2
     };
 
-    Geometry::generateTangents(vertices, indices);
+    if (genTangents) Geometry::generateTangents(vertices, indices);
 
     std::cout << "[Plane] Vertices: " << vertices.size()
               << " | Indices: " << indices.size() << std::endl;

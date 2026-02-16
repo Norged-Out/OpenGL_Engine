@@ -14,19 +14,20 @@ namespace Geometry {
     // -------- Mesh generation --------
 
     // Creates a simple cube mesh (positions, indices, normals, UVs, tangents)
-    std::unique_ptr<Mesh> createCubeMesh();
+    std::unique_ptr<Mesh> createCubeMesh(bool genTangents = true);
 
     // Creates a simple pyramid mesh (positions, indices, normals, UVs, tangents)
-    std::unique_ptr<Mesh> createPyramidMesh();
+    std::unique_ptr<Mesh> createPyramidMesh(bool genTangents = true);
 
     // Creates a unit sphere mesh (positions, indices, normals, UVs, tangents)
-    std::unique_ptr<Mesh> createSphereMesh(int stacks = 16, int slices = 24);
+    std::unique_ptr<Mesh> createSphereMesh(int stacks = 16, int slices = 24, bool genTangents = true);
 
     // Creates a Donut-shaped ring mesh (positions, indices, normals, UVs, tangents)
-    std::unique_ptr<Mesh> createRingMesh();    
+    std::unique_ptr<Mesh> createRingMesh(bool genTangents = true);    
 
     // Creates a simple plane mesh
-    std::unique_ptr<Mesh> createPlaneMesh(float width = 1.0f, float height = 1.0f, float uvScale = 1.0f);
+    std::unique_ptr<Mesh> createPlaneMesh(float width = 1.0f, float height = 1.0f, 
+        float uvScale = 1.0f, bool genTangents = true);
 
     // -------- Tangent utilities --------
 
