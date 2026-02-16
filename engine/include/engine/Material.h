@@ -12,6 +12,8 @@ class Material
 public:
     void setTexture(const std::string& type, std::shared_ptr<Texture> tex);
     void bind(Shader& shader);
+    void setFiltering(GLenum minFilter, GLenum magFilter);
+    void setWrapping(GLenum wrapS, GLenum wrapT);
 
     static std::shared_ptr<Material> CreateMat(
         const std::string& diffusePath,

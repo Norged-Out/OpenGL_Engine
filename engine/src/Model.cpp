@@ -232,14 +232,6 @@ void Model::attachTextures(std::shared_ptr<Material> materialObj,
 
     bool loadedAny = false;
 
-    // Prevent duplicate semantics (one texture per type)
-    // auto hasType = [&](const char* type) {
-    //     return std::any_of(textures.begin(), textures.end(),
-    //         [&](const std::shared_ptr<Texture>& t) {
-    //             return std::strcmp(t->type, type) == 0;
-    //         });
-    // };
-
 	// Load textures defined in the Assimp material
     for (const auto& pair : types) {
         aiTextureType type = pair.first;
@@ -286,7 +278,6 @@ void Model::attachTextures(std::shared_ptr<Material> materialObj,
 std::shared_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     std::vector<Vertex> vertices;
     std::vector<GLuint> indices;
-    //std::vector<std::shared_ptr<Texture>> textures;
     auto materialObj = std::make_shared<Material>();
 
     // extract vertex data

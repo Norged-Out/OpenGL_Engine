@@ -18,49 +18,57 @@ void Material::bind(Shader& shader) {
     }
 }
 
+void Material::setFiltering(GLenum minFilter, GLenum magFilter) {
+    // Update filtering parameters for all textures in this material
+    for (auto& [type, tex] : textures) {
+        tex->setFiltering(minFilter, magFilter);
+    }
+}
+
+void Material::setWrapping(GLenum wrapS, GLenum wrapT) {
+    // Update wrapping parameters for all textures in this material
+    for (auto& [type, tex] : textures) {
+        tex->setWrapping(wrapS, wrapT);
+    }
+}
+
 std::shared_ptr<Material> Material::CreateMat(
     const std::string& diffusePath,
     const std::string& normalPath,
     const std::string& roughnessPath,
     const std::string& metallicPath,
-    const std::string& aoPath)
-{
+    const std::string& aoPath) {
     auto material = std::make_shared<Material>();
 
-    if (!diffusePath.empty())
-    {
+    if (!diffusePath.empty()) {
         material->setTexture("diffuse",
             std::make_shared<Texture>(
                 diffusePath.c_str(),
                 GL_UNSIGNED_BYTE));
     }
 
-    if (!normalPath.empty())
-    {
+    if (!normalPath.empty()) {
         material->setTexture("normal",
             std::make_shared<Texture>(
                 normalPath.c_str(),
                 GL_UNSIGNED_BYTE));
     }
 
-    if (!roughnessPath.empty())
-    {
+    if (!roughnessPath.empty()) {
         material->setTexture("roughness",
             std::make_shared<Texture>(
                 roughnessPath.c_str(),
                 GL_UNSIGNED_BYTE));
     }
 
-    if (!metallicPath.empty())
-    {
+    if (!metallicPath.empty()) {
         material->setTexture("metallic",
             std::make_shared<Texture>(
                 metallicPath.c_str(),
                 GL_UNSIGNED_BYTE));
     }
 
-    if (!aoPath.empty())
-    {
+    if (!aoPath.empty()) {
         material->setTexture("ao",
             std::make_shared<Texture>(
                 aoPath.c_str(),
