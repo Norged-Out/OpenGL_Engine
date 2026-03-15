@@ -94,6 +94,7 @@ add_library(engine
     engine/src/Mesh.cpp
     engine/src/Model.cpp
     engine/src/Shader.cpp
+    engine/src/ShadowMap.cpp
     engine/src/Skybox.cpp
     engine/src/Texture.cpp
     engine/src/VAO.cpp

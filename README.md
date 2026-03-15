@@ -160,6 +160,31 @@ Defines how the scene is viewed, but does not modify scene objects.
 
 ---
 
+### Shadow Mapping (Baseline)
+
+The engine includes a basic directional-light shadow mapping pipeline used as a baseline for real-time rendering experiments.
+
+The implementation performs a two-pass render:
+
+1. **Shadow pass**  
+   The scene is rendered from the light's perspective into a depth texture using an orthographic projection.  
+   This produces a shadow map storing the closest surface depth for each texel.
+
+2. **Scene pass**  
+   During normal rendering, each fragment is transformed into light space and compared against the stored depth to determine if it is shadowed.
+
+Current features include:
+
+- Directional light shadow maps
+- Configurable shadow resolution
+- Slope-scaled depth bias to reduce shadow acne
+- Optional **Percentage Closer Filtering (PCF)** for softer shadow edges
+- Debug visualization of the shadow map via ImGui
+
+The baseline implementation intentionally exposes typical shadow-map artifacts (aliasing, bias sensitivity, PCF sampling patterns) and is used as a reference point for implementing more advanced techniques such as **Moment Shadow Maps (MSM)**.
+
+---
+
 ## Architectural Principles
 
 - Clear ownership boundaries
