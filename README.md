@@ -16,6 +16,8 @@ It is intended to be used as a **vendored engine** by being included in projects
 - PBR-style material system
 - Texture system with runtime filtering + wrapping control
 - Skybox rendering using custom HDRI to Cubemap converter and stb_image
+- Internal engine shader assets for reusable rendering systems
+- Directional shadow map system with baseline depth + MSM support
 - Camera system (free + cinematic modes)
 - UI integration via Dear ImGui (GLFW + OpenGL3 backend)
 - Clean CMake target boundaries
@@ -160,28 +162,26 @@ Defines how the scene is viewed, but does not modify scene objects.
 
 ---
 
-### Shadow Mapping (Baseline)
+### Engine-Owned Rendering Systems
 
-The engine includes a basic directional-light shadow mapping pipeline used as a baseline for real-time rendering experiments.
+#### Skybox
+Owns:
+- Cubemap rendering state
+- Internal skybox shader loaded from `assets/shaders`
 
-The implementation performs a two-pass render:
+Consumer projects only need to create the cubemap and call `Draw()`.
 
-1. **Shadow pass**  
-   The scene is rendered from the light's perspective into a depth texture using an orthographic projection.  
-   This produces a shadow map storing the closest surface depth for each texel.
+---
 
-2. **Scene pass**  
-   During normal rendering, each fragment is transformed into light space and compared against the stored depth to determine if it is shadowed.
+#### ShadowMap
+Owns:
+- Shadow framebuffer resources
+- Light-space matrix setup
+- Internal shadow pass shader loaded from `assets/shaders`
+- Depth shadow map mode
+- MSM moment shadow map mode
 
-Current features include:
-
-- Directional light shadow maps
-- Configurable shadow resolution
-- Slope-scaled depth bias to reduce shadow acne
-- Optional **Percentage Closer Filtering (PCF)** for softer shadow edges
-- Debug visualization of the shadow map via ImGui
-
-The baseline implementation intentionally exposes typical shadow-map artifacts (aliasing, bias sensitivity, PCF sampling patterns) and is used as a reference point for implementing more advanced techniques such as **Moment Shadow Maps (MSM)**.
+Consumer projects still decide which objects cast shadows, but the engine owns the reusable shadow pass infrastructure.
 
 ---
 
@@ -345,6 +345,7 @@ No package manager or toolchain file is required.
 - No implicit texture slot conventions
 - No hidden include paths
 - No global rendering state
+- Reusable engine systems may own their own internal shaders
 - Engine code must not assume consumer project layout
 - Consumer projects configure behavior via compile definitions
 
@@ -357,13 +358,11 @@ No package manager or toolchain file is required.
 - Does not provide a default application entry point
 - Does not include a scene editor
 - Does not include a runtime asset pipeline
+- Does not force consumer projects to use engine-provided scene/material shaders
 - Not optimized for distribution or commercial deployment
 
 ---
 
-## License
-
-Personal / educational use.
 ## License
 
 Personal / educational use.

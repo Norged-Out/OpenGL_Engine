@@ -115,7 +115,7 @@ target_link_libraries(engine PUBLIC
     imgui::imgui
 )
 
-# ---- for HDRI to cubemap conversion ----
+# ---- internal shaders ----
 target_compile_definitions(engine PUBLIC
     ENGINE_SHADER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/assets/shaders/"
 )
