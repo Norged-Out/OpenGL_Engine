@@ -68,13 +68,19 @@ private:
     void createDepthResources();
     void createMSMResources();
     void bindCurrentFramebuffer() const;
+    void applyMomentBlur();
+    void ensureBlurResources();
 
     // GPU resources
     GLuint FBO = 0;
     GLuint depthTexture = 0;
     GLuint momentTexture = 0;
     GLuint depthRBO = 0;
+    GLuint blurFBO = 0;
+    GLuint blurTexture = 0;
+    GLuint blurVAO = 0;
     Shader* passShader = nullptr;
+    Shader* blurShader = nullptr;
 
     // Shadow map resolution
     unsigned int width;

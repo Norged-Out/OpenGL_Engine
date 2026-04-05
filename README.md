@@ -180,6 +180,7 @@ Owns:
 - Internal shadow pass shader loaded from `assets/shaders`
 - Depth shadow map mode
 - MSM moment shadow map mode
+- Built-in two-pass Gaussian blur for MSM moment filtering
 
 Consumer projects still decide which objects cast shadows, but the engine owns the reusable shadow pass infrastructure.
 
@@ -202,6 +203,7 @@ This structure enables:
 - Runtime texture sampling control (mipmapping demonstrations)
 - Stable engine updates across coursework projects
 - Predictable rendering behavior
+- Easier comparison between baseline shadows and research-inspired shadow techniques
 
 ---
 
@@ -346,6 +348,7 @@ No package manager or toolchain file is required.
 - No hidden include paths
 - No global rendering state
 - Reusable engine systems may own their own internal shaders
+- Reusable engine systems may also own their own internal post-process steps when the feature needs them
 - Engine code must not assume consumer project layout
 - Consumer projects configure behavior via compile definitions
 

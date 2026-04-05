@@ -9,8 +9,9 @@ void main()
     // Baseline check
     if (shadowMode == 0) return;
 
-    // Use the exact rasterized depth
+    // Use the exact rasterized depth and remap it into signed depth
     float z = clamp(gl_FragCoord.z, 0.0, 1.0);
+    z = z * 2.0 - 1.0;
 
     // Store the first four moments of that depth
     float z2 = z * z;
