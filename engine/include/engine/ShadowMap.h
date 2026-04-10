@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
+#include <cstddef>
 
 class Shader;
 
@@ -54,11 +55,25 @@ public:
 
     ShadowMode getMode() const { return mode; }
     void setMode(ShadowMode newMode);
+    void resize(unsigned int newWidth, unsigned int newHeight);
+
+    void setUseSignedDepth(bool enabled) { useSignedDepth = enabled; }
+    bool getUseSignedDepth() const { return useSignedDepth; }
+
+    void setBlurEnabled(bool enabled) { blurEnabled = enabled; }
+    bool isBlurEnabled() const { return blurEnabled; }
+
+    void setBlurScale(float scale) { blurScale = scale; }
+    float getBlurScale() const { return blurScale; }
 
     // Debug access
     GLuint getDepthTexture() const { return depthTexture; }
     GLuint getMomentTexture() const { return momentTexture; }
     GLuint getDebugTexture() const { return mode == ShadowMode::MSM ? momentTexture : depthTexture; }
+    unsigned int getWidth() const { return width; }
+    unsigned int getHeight() const { return height; }
+    size_t getApproxMemoryBytes() const;
+    double getLastBlurMs() const { return lastBlurMs; }
 
     // Cleanup
     void Delete();
@@ -86,6 +101,10 @@ private:
     unsigned int width;
     unsigned int height;
     ShadowMode mode = ShadowMode::Depth;
+    bool useSignedDepth = true;
+    bool blurEnabled = true;
+    float blurScale = 1.0f;
+    double lastBlurMs = 0.0;
 
     // Light matrices
     glm::mat4 lightView = glm::mat4(1.0f);

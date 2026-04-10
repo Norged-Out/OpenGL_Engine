@@ -2,6 +2,7 @@
 #include "engine/Shader.h"
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <chrono>
 #include <iostream>
 #include <string>
 
@@ -116,7 +117,8 @@ void ShadowMap::Begin() {
 
 
 void ShadowMap::End() {
-    if (mode == ShadowMode::MSM) {
+    lastBlurMs = 0.0;
+    if (mode == ShadowMode::MSM && blurEnabled) {
         applyMomentBlur();
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -173,6 +175,7 @@ void ShadowMap::bindPassShader() const {
     // Push the shared shadow-pass state before the app draws each caster.
     passShader->Activate();
     passShader->setInt("shadowMode", static_cast<int>(mode));
+    passShader->setBool("useSignedMSMDepth", useSignedDepth);
     applyUniforms(*passShader);
 }
 
@@ -185,6 +188,25 @@ void ShadowMap::setMode(ShadowMode newMode) {
 
     Delete();
     mode = newMode;
+    glGenFramebuffers(1, &FBO);
+    passShader = new Shader(
+        std::string(ENGINE_SHADER_DIR) + "shadow.vert",
+        std::string(ENGINE_SHADER_DIR) + "shadow.frag"
+    );
+    blurShader = new Shader(
+        std::string(ENGINE_SHADER_DIR) + "moment_blur.vert",
+        std::string(ENGINE_SHADER_DIR) + "moment_blur.frag"
+    );
+    createResources();
+}
+
+void ShadowMap::resize(unsigned int newWidth, unsigned int newHeight) {
+    if (width == newWidth && height == newHeight) return;
+
+    width = newWidth;
+    height = newHeight;
+
+    Delete();
     glGenFramebuffers(1, &FBO);
     passShader = new Shader(
         std::string(ENGINE_SHADER_DIR) + "shadow.vert",
@@ -229,12 +251,15 @@ void ShadowMap::applyMomentBlur() {
         return;
     }
 
+    auto blurStart = std::chrono::high_resolution_clock::now();
+
     glDisable(GL_DEPTH_TEST);
     glBindVertexArray(blurVAO);
 
     blurShader->Activate();
     blurShader->setInt("sourceTexture", 0);
     blurShader->setVec2("texelSize", glm::vec2(1.0f / width, 1.0f / height));
+    blurShader->setFloat("blurScale", blurScale);
 
     // Blur horizontally from the raw moment map into a temporary texture.
     glBindFramebuffer(GL_FRAMEBUFFER, blurFBO);
@@ -257,6 +282,23 @@ void ShadowMap::applyMomentBlur() {
 
     // The blur is just a post-process step, so restore depth testing for normal rendering.
     glEnable(GL_DEPTH_TEST);
+
+    auto blurEnd = std::chrono::high_resolution_clock::now();
+    lastBlurMs = std::chrono::duration<double, std::milli>(blurEnd - blurStart).count();
+}
+
+size_t ShadowMap::getApproxMemoryBytes() const {
+    // Estimate only the shadow resources this subsystem owns right now.
+    size_t depthBytes = static_cast<size_t>(width) * static_cast<size_t>(height) * 4ull;
+    size_t momentBytes = static_cast<size_t>(width) * static_cast<size_t>(height) * 16ull;
+    size_t depthRboBytes = static_cast<size_t>(width) * static_cast<size_t>(height) * 4ull;
+    size_t blurBytes = static_cast<size_t>(width) * static_cast<size_t>(height) * 16ull;
+
+    if (mode == ShadowMode::MSM) {
+        return momentBytes + depthRboBytes + blurBytes;
+    }
+
+    return depthBytes;
 }
 
 

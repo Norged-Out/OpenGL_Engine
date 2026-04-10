@@ -7,11 +7,12 @@ out vec4 fragColor;
 uniform sampler2D sourceTexture;
 uniform vec2 texelSize;
 uniform vec2 blurDirection;
+uniform float blurScale;
 
 void main()
 {
     // Convert the chosen blur direction into a one-texel UV offset
-    vec2 offset = texelSize * blurDirection;
+    vec2 offset = texelSize * blurDirection * blurScale;
 
     // Fixed 5-tap Gaussian blur:
     // center sample gets the most weight,
