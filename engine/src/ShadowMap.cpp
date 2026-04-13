@@ -15,7 +15,7 @@ ShadowMap::ShadowMap(unsigned int width, unsigned int height, ShadowMode mode)
     // Generate framebuffer
     glGenFramebuffers(1, &FBO);
 
-    // One shader renders the shadow data, the other blurs MSM moments afterward.
+    // One shader renders the shadow data, the other blurs MSM moments afterward
     passShader = new Shader(
         std::string(ENGINE_SHADER_DIR) + "shadow.vert",
         std::string(ENGINE_SHADER_DIR) + "shadow.frag"
@@ -28,7 +28,7 @@ ShadowMap::ShadowMap(unsigned int width, unsigned int height, ShadowMode mode)
 }
 
 void ShadowMap::createResources() {
-    // Depth mode keeps the classic shadow map path, MSM mode allocates moment textures.
+    // Depth mode keeps the classic shadow map path, MSM mode allocates moment textures
     if (mode == ShadowMode::MSM) {
         createMSMResources();
     } else {
@@ -71,7 +71,7 @@ void ShadowMap::createDepthResources() {
 }
 
 void ShadowMap::createMSMResources() {
-    // Store the four depth moments in an RGBA floating-point texture.
+    // Store the four depth moments in an RGBA floating-point texture
     glGenTextures(1, &momentTexture);
     glBindTexture(GL_TEXTURE_2D, momentTexture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
@@ -83,7 +83,7 @@ void ShadowMap::createMSMResources() {
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, momentTexture, 0);
 
-    // Keep a depth attachment for rasterization correctness during the shadow pass.
+    // Keep a depth attachment for rasterization correctness during the shadow pass
     glGenRenderbuffers(1, &depthRBO);
     glBindRenderbuffer(GL_RENDERBUFFER, depthRBO);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
@@ -106,7 +106,7 @@ void ShadowMap::Begin() {
     glViewport(0, 0, width, height);
     bindCurrentFramebuffer();
 
-    // MSM writes color + depth, while the baseline only needs a depth clear.
+    // MSM writes color + depth, while the baseline only needs a depth clear
     if (mode == ShadowMode::MSM) {
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -134,13 +134,13 @@ void ShadowMap::BindTexture(GLuint unit) const {
 }
 
 void ShadowMap::BindDepthTexture(GLuint unit) const {
-    // Bind the baseline depth texture for hard shadows or PCF.
+    // Bind the baseline depth texture for hard shadows or PCF
     glActiveTexture(GL_TEXTURE0 + unit);
     glBindTexture(GL_TEXTURE_2D, depthTexture);
 }
 
 void ShadowMap::BindMomentTexture(GLuint unit) const {
-    // Bind the filtered moment texture for MSM reconstruction.
+    // Bind the filtered moment texture for MSM reconstruction
     glActiveTexture(GL_TEXTURE0 + unit);
     glBindTexture(GL_TEXTURE_2D, momentTexture);
 }
@@ -172,7 +172,7 @@ void ShadowMap::applyUniforms(Shader& shader, const char* uniformName) const {
 void ShadowMap::bindPassShader() const {
     if (!passShader) return;
 
-    // Push the shared shadow-pass state before the app draws each caster.
+    // Push the shared shadow-pass state before the app draws each caster
     passShader->Activate();
     passShader->setInt("shadowMode", static_cast<int>(mode));
     passShader->setBool("useSignedMSMDepth", useSignedDepth);
@@ -224,13 +224,13 @@ void ShadowMap::bindCurrentFramebuffer() const {
 }
 
 void ShadowMap::ensureBlurResources() {
-    // Create a tiny post-process setup once and reuse it every frame.
+    // Create a tiny post-process setup once and reuse it every frame
     if (blurFBO == 0) {
         glGenFramebuffers(1, &blurFBO);
     }
 
     if (blurTexture == 0) {
-        // Temporary texture that holds the horizontal blur result.
+        // Temporary texture that holds the horizontal blur result
         glGenTextures(1, &blurTexture);
         glBindTexture(GL_TEXTURE_2D, blurTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
@@ -241,7 +241,7 @@ void ShadowMap::ensureBlurResources() {
     }
 
     if (blurVAO == 0) {
-        // Fullscreen triangle draw needs only a VAO in core OpenGL.
+        // Fullscreen triangle draw needs only a VAO in core OpenGL
         glGenVertexArrays(1, &blurVAO);
     }
 }
@@ -261,7 +261,7 @@ void ShadowMap::applyMomentBlur() {
     blurShader->setVec2("texelSize", glm::vec2(1.0f / width, 1.0f / height));
     blurShader->setFloat("blurScale", blurScale);
 
-    // Blur horizontally from the raw moment map into a temporary texture.
+    // Blur horizontally from the raw moment map into a temporary texture
     glBindFramebuffer(GL_FRAMEBUFFER, blurFBO);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, blurTexture, 0);
     glViewport(0, 0, width, height);
@@ -271,7 +271,7 @@ void ShadowMap::applyMomentBlur() {
     blurShader->setVec2("blurDirection", glm::vec2(1.0f, 0.0f));
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
-    // Blur vertically back into the main moment texture.
+    // Blur vertically back into the main moment texture
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, momentTexture, 0);
     glClear(GL_COLOR_BUFFER_BIT);
     glBindTexture(GL_TEXTURE_2D, blurTexture);
@@ -280,7 +280,7 @@ void ShadowMap::applyMomentBlur() {
 
     glBindVertexArray(0);
 
-    // The blur is just a post-process step, so restore depth testing for normal rendering.
+    // The blur is just a post-process step, so restore depth testing for normal rendering
     glEnable(GL_DEPTH_TEST);
 
     auto blurEnd = std::chrono::high_resolution_clock::now();
@@ -288,7 +288,7 @@ void ShadowMap::applyMomentBlur() {
 }
 
 size_t ShadowMap::getApproxMemoryBytes() const {
-    // Estimate only the shadow resources this subsystem owns right now.
+    // Estimate only the shadow resources this subsystem owns right now
     size_t depthBytes = static_cast<size_t>(width) * static_cast<size_t>(height) * 4ull;
     size_t momentBytes = static_cast<size_t>(width) * static_cast<size_t>(height) * 16ull;
     size_t depthRboBytes = static_cast<size_t>(width) * static_cast<size_t>(height) * 4ull;
