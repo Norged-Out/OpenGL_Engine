@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: HDR texture loading and GPU upload logic
+// ==================================================
+
 #include "engine/HDRTexture.h"
 #include <iostream>
 #include <stb_image.h>

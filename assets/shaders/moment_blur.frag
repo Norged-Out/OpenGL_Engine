@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Fragment shader for the separable Gaussian blur applied to MSM moments
+// ==================================================
+
 #version 330 core
 
 in vec2 texCoord;
@@ -9,6 +14,8 @@ uniform vec2 texelSize;
 uniform vec2 blurDirection;
 uniform float blurScale;
 
+// Description: Shader entry point
+// Params: none
 void main()
 {
     // Convert the chosen blur direction into a one-texel UV offset
@@ -27,3 +34,4 @@ void main()
     // Output the blurred moment sample
     fragColor = result;
 }
+

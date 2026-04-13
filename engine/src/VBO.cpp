@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Vertex buffer creation and upload implementation
+// ==================================================
+
 #include "engine/VBO.h"
 
 // Constructor that generates a Vertex Buffer Object and links it to vertices

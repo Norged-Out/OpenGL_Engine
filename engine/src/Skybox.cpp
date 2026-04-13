@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Skybox draw path and internal shader setup
+// ==================================================
+
 #include "engine/Skybox.h"
 #include "engine/Shader.h"
 #include <glad/glad.h>
@@ -98,3 +103,4 @@ void Skybox::Draw(const Camera& camera) {
     glDepthMask(GL_TRUE);
     glDepthFunc(GL_LESS);
 }
+

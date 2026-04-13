@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Element buffer setup and binding implementation
+// ==================================================
+
 #include "engine/EBO.h"
 
 // Constructor that generates a Elements Buffer Object and links it to indices

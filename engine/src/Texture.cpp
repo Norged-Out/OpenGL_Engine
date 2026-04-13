@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Texture loading, filtering, and GPU upload implementation
+// ==================================================
+
 #include "engine/Texture.h"
 #include <iostream>
 #include <stb_image.h>

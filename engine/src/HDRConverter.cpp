@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Offscreen HDR conversion into a cubemap resource
+// ==================================================
+
 #include "engine/HDRConverter.h"
 #include "engine/Shader.h"
 #include "engine/HDRTexture.h"

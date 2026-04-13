@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Model loading, transform control, and draw traversal
+// ==================================================
+
 #include "engine/Model.h"
 #include "engine/Shader.h"
 #include "engine/Mesh.h"

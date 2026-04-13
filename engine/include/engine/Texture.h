@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: 2D texture wrapper used by materials and model assets
+// ==================================================
+
 #pragma once
 
 #include <glad/glad.h>
@@ -8,8 +13,10 @@ class Texture
 public:
 	GLuint ID = 0;
 	// Constructor for loading from file
+	// Params: const char* imagePath, GLenum pixelType
 	Texture(const char* imagePath, GLenum pixelType);
 	// Constructor for embedded textures loaded from memory
+	// Params: const unsigned char* data, size_t size, GLenum pixelType
 	Texture(const unsigned char* data, size_t size, GLenum pixelType);
 
 	~Texture() {
@@ -21,15 +28,20 @@ public:
 	Texture& operator=(const Texture&) = delete;
 
 	// Bind to currently active texture unit
+	// Params: none
 	void Bind(); 
 	// Bind to a specific texture unit
+	// Params: GLuint unit
 	void Bind(GLuint unit); 
 	// Unbinds a texture
+	// Params: none
 	void Unbind();
 	// Deletes a texture
+	// Params: none
 	void Delete();
 
 	// Setters for texture parameters
+	// Params: GLenum newMin, GLenum newMag
 	void setFiltering(GLenum newMin, GLenum newMag);
 	void setWrapping(GLenum newWrapS, GLenum newWrapT);
 

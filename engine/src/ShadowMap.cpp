@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Shadow-map resource management, pass setup, and MSM blur logic
+// ==================================================
+
 #include "engine/ShadowMap.h"
 #include "engine/Shader.h"
 
@@ -331,3 +336,4 @@ void ShadowMap::Delete() {
     blurFBO = 0;
     blurVAO = 0;
 }
+

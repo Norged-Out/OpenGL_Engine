@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Skybox renderer that owns its cubemap and shader state
+// ==================================================
+
 #pragma once
 
 #include "engine/Cubemap.h"
@@ -7,9 +12,13 @@ class Shader;
 
 class Skybox {
 public:
+    // Description: Skybox
+    // Params: Cubemap& cubemap
     Skybox(Cubemap& cubemap);
     ~Skybox();
 
+    // Description: Draw
+    // Params: const Camera& camera
     void Draw(const Camera& camera);
 
 private:
@@ -19,5 +28,8 @@ private:
     Cubemap& environment;
     Shader* shader = nullptr;
 
+    // Description: initCube
+    // Params: none
     void initCube();
 };
+

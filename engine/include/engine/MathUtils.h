@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Small math helpers used across transforms and scene setup
+// ==================================================
+
 #pragma once
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -19,15 +24,19 @@ namespace MathUtils {
                                  RotationOrder order);
 
     // Quaternion interpolation
+    // Params: const glm::quat& a, const glm::quat& b, float t
     glm::quat slerp(const glm::quat& a, const glm::quat& b, float t);
 
     // Scalar interpolation
+    // Params: float a, float b, float t
     float lerp(float a, float b, float t);
 
     // Clamp to [0, 1]
+    // Params: float t
     float clamp01(float t);
 
     // Smooth time remapping (smoothstep)
+    // Params: float t
     float easeInOut(float t);
 
     // Catmull-Rom spline interpolation

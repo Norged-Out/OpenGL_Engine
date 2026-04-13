@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Camera movement, matrix updates, and camera mode logic
+// ==================================================
+
 #include "engine/Camera.h"
 #include "engine/Shader.h"
 

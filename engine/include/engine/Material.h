@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Material bundle describing the textures used by a mesh
+// ==================================================
+
 #pragma once
 
 #include <unordered_map>
@@ -10,8 +15,12 @@ class Shader;
 class Material
 {
 public:
+    // Description: setTexture
+    // Params: const std::string& type, std::shared_ptr<Texture> tex
     void setTexture(const std::string& type, std::shared_ptr<Texture> tex);
     void bind(Shader& shader);
+    // Description: setFiltering
+    // Params: GLenum minFilter, GLenum magFilter
     void setFiltering(GLenum minFilter, GLenum magFilter);
     void setWrapping(GLenum wrapS, GLenum wrapT);
 

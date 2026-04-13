@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Fragment shader that samples an HDR texture into cubemap faces
+// ==================================================
+
 #version 330 core
 
 in vec3 localPos;
@@ -16,3 +21,4 @@ void main() {
     vec3 color = texture(eqrMap, uv).rgb;
     fragColor = vec4(color, 1.0);
 }
+

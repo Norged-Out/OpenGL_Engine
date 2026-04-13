@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Transform and interpolation helper implementations
+// ==================================================
+
 #include "engine/MathUtils.h"
 #include <algorithm> // for std::clamp
 

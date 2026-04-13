@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Mesh wrapper that owns geometry buffers and material state
+// ==================================================
+
 #pragma once
 
 #include <vector> 
@@ -45,6 +50,7 @@ public:
 	void setMaterial(std::shared_ptr<Material> mat) { material = mat; }
 
 	// Draws the mesh
+	// Params: Shader& shader
 	void Draw(Shader& shader);
 
 private:

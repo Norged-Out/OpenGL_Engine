@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Cubemap texture wrapper used by the skybox and HDR conversion pipeline
+// ==================================================
+
 #pragma once
 
 #include <glad/glad.h>
@@ -7,6 +12,9 @@ public:
     GLuint ID = 0;
     int size = 0;
 
+    // Description: Cubemap
+    // Params: int resolution
     Cubemap(int resolution);
     void Bind(GLuint unit = 0) const;
 };
+

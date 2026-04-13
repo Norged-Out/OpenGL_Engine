@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Material creation helpers and texture assignment logic
+// ==================================================
+
 #include "engine/Material.h"
 #include "engine/Shader.h"
 

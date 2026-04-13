@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Imported model wrapper built on top of Assimp-loaded meshes
+// ==================================================
+
 #pragma once
 
 
@@ -26,6 +31,7 @@ class Model
 {
 public:
     // constructors
+    // Params: const std::string& path
     explicit Model(const std::string& path);
     Model(const std::string& path, const std::vector<std::string>& skipNames);
 
@@ -34,14 +40,20 @@ public:
     Model& operator=(const Model&) = delete;
 
     // simple setters for TRS
+    // Params: const glm::vec3& pos
     void setPosition(const glm::vec3& pos);
     void setRotation(float angleDeg, const glm::vec3& axis); // axis-angle
+    // Description: setScale
+    // Params: const glm::vec3& s
     void setScale(const glm::vec3& s);
 
     // additional usage for Rotation
+    // Params: const glm::quat& q
     void setRotationQuat(const glm::quat& q);
     void setRotationEuler(float pitchDeg, float yawDeg, float rollDeg,
                       MathUtils::RotationOrder order = MathUtils::RotationOrder::YXZ);
+    // Description: getRotationQuat
+    // Params: none
     glm::quat getRotationQuat() const;
 
 	glm::mat4 getModelMatrix() const {
@@ -57,6 +69,7 @@ public:
     glm::vec3 getAABBSize() const { return (aabbMax - aabbMin); }
 
     // draw the model's meshes
+    // Params: Shader& shader
     void Draw(Shader& shader);
 
 private:
@@ -78,14 +91,20 @@ private:
 
     // Skip some unwanted meshes
     std::vector<std::string> meshNameSkips;
+    // Description: shouldSkipMesh
+    // Params: const std::string& name
     bool shouldSkipMesh(const std::string& name) const;
 
 	// procedure to load model
+    // Params: const std::string& path
     void loadModel(const std::string& path);
     void processNode(aiNode* node, const aiScene* scene);
+    // Description: processMesh
+    // Params: aiMesh* mesh, const aiScene* scene
     std::shared_ptr<Mesh> processMesh(aiMesh* mesh, const aiScene* scene);
     
 	// Texture loading
+    // Params: const aiString& path, const aiScene* scene
     std::shared_ptr<Texture> loadTexture(const aiString& path, const aiScene* scene);
     void attachTextures(std::shared_ptr<Material> materialObj,
         aiMaterial* material, const aiScene* scene);

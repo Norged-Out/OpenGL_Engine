@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Cubemap creation and binding logic for environment rendering
+// ==================================================
+
 #include "engine/Cubemap.h"
 
 Cubemap::Cubemap(int resolution) : size(resolution) {
@@ -28,3 +33,4 @@ void Cubemap::Bind(GLuint unit) const {
     glActiveTexture(GL_TEXTURE0 + unit);
     glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
 }
+

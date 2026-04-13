@@ -18,12 +18,18 @@ It is intended to be used as a **vendored engine** by being included in projects
 - Skybox rendering using custom HDRI to Cubemap converter and stb_image
 - Internal engine shader assets for reusable rendering systems
 - Directional shadow map system with baseline depth + MSM support
+- Built-in MSM Gaussian blur support for filtered moment shadow maps
 - Camera system (free + cinematic modes)
 - UI integration via Dear ImGui (GLFW + OpenGL3 backend)
 - Clean CMake target boundaries
 - Fully vendored dependencies (no package manager required)
 
 ---
+
+## Documentation Style
+
+Engine-owned source files include a short author / description header, and the public API headers include lightweight function comments for quick navigation.
+The goal is to keep the engine readable as a reusable coursework codebase without turning it into a full generated reference manual.
 
 ## Core Architecture
 
@@ -369,3 +375,5 @@ No package manager or toolchain file is required.
 ## License
 
 Personal / educational use.
+
+

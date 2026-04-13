@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Mesh draw logic, attribute setup, and material binding
+// ==================================================
+
 #include "engine/Mesh.h"
 #include "engine/Shader.h"
 #include <glm/gtc/matrix_transform.hpp>

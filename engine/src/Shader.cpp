@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Shader compilation, linking, and uniform helper implementation
+// ==================================================
+
 #include "engine/Shader.h"
 #include <fstream>
 #include <sstream>

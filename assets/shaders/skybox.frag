@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Fragment shader for sampling the environment cubemap in the skybox pass
+// ==================================================
+
 #version 330 core
 
 in vec3 texDir;
@@ -14,3 +19,4 @@ void main() {
 
     fragColor = vec4(color, 1.0);
 }
+

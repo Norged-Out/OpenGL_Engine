@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Procedural geometry generation for reusable primitive meshes
+// ==================================================
+
 #include "engine/Geometry.h"
 #include "engine/Texture.h"
 #include <iostream>

@@ -1,7 +1,14 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Vertex shader for the fullscreen MSM blur pass
+// ==================================================
+
 #version 330 core
 
 out vec2 texCoord;
 
+// Description: Shader entry point
+// Params: none
 void main()
 {
     // Fullscreen triangle positions in clip space.
@@ -16,3 +23,4 @@ void main()
     texCoord = pos * 0.5 + 0.5;
     gl_Position = vec4(pos, 0.0, 1.0);
 }
+

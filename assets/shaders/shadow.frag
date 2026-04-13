@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Fragment shader that writes either depth or MSM moments during the shadow pass
+// ==================================================
+
 #version 330 core
 
 layout (location = 0) out vec4 momentOut; // Output RGBA moments for MSM mode
@@ -5,6 +10,8 @@ layout (location = 0) out vec4 momentOut; // Output RGBA moments for MSM mode
 uniform int shadowMode = 0; // 0 = baseline depth path, 1 = MSM moment-writing path
 uniform bool useSignedMSMDepth = true; // Toggle signed vs unsigned depth storage for comparison work
 
+// Description: Shader entry point
+// Params: none
 void main()
 {
     // Baseline check
@@ -22,3 +29,4 @@ void main()
     float z2 = z * z;
     momentOut = vec4(z, z2, z2 * z, z2 * z2);
 }
+

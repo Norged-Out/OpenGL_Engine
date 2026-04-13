@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Definitions for window, OpenGL, camera, and ImGui setup helpers
+// ==================================================
+
 #include "engine/AppSetup.h"
 #include "engine/Camera.h"
 #include <iostream>

@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Vertex shader for rendering the fullscreen cubemap conversion pass
+// ==================================================
+
 #version 330 core
 
 layout (location = 0) in vec3 aPos;
@@ -11,3 +16,4 @@ void main() {
     localPos = aPos; // cube direction
     gl_Position = projection * view * vec4(aPos, 1.0);
 }
+

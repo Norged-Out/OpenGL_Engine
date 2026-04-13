@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Procedural mesh factory helpers for common primitives
+// ==================================================
+
 #pragma once
 
 #include <memory>
@@ -14,15 +19,19 @@ namespace Geometry {
     // -------- Mesh generation --------
 
     // Creates a simple cube mesh (positions, indices, normals, UVs, tangents)
+    // Params: bool genTangents = true
     std::unique_ptr<Mesh> createCubeMesh(bool genTangents = true);
 
     // Creates a simple pyramid mesh (positions, indices, normals, UVs, tangents)
+    // Params: bool genTangents = true
     std::unique_ptr<Mesh> createPyramidMesh(bool genTangents = true);
 
     // Creates a unit sphere mesh (positions, indices, normals, UVs, tangents)
+    // Params: int stacks = 16, int slices = 24, bool genTangents = true
     std::unique_ptr<Mesh> createSphereMesh(int stacks = 16, int slices = 24, bool genTangents = true);
 
     // Creates a Donut-shaped ring mesh (positions, indices, normals, UVs, tangents)
+    // Params: bool genTangents = true
     std::unique_ptr<Mesh> createRingMesh(bool genTangents = true);    
 
     // Creates a simple plane mesh
@@ -32,5 +41,6 @@ namespace Geometry {
     // -------- Tangent utilities --------
 
     // Generic tangent generator (reusable for any indexed mesh)
+    // Params: std::vector<Vertex>& vertices, const std::vector<GLuint>& indices
     void generateTangents(std::vector<Vertex>& vertices, const std::vector<GLuint>& indices);
 }

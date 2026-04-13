@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Camera state and movement controls used by the engine renderer
+// ==================================================
+
 #pragma once
 
 #include <glad/glad.h>
@@ -57,19 +62,26 @@ public:
 	float orbitHeight = 15.0f;   // above mid terrain
 
 	// Camera constructor to set up initial values
+	// Params: int width, int height, glm::vec3 position
 	Camera(int width, int height, glm::vec3 position);
 
 	// Updates the camera matrix to the Vertex Shader
+	// Params: float nearPlane, float farPlane
 	void updateMatrix(float nearPlane, float farPlane);
 	// Exports the camera matrix to a shader
+	// Params: class Shader& shader, const char* uniform
 	void Matrix(class Shader& shader, const char* uniform) const;
 	// Updates stored window size
+	// Params: int newWidth, int newHeight
 	void setSize(int newWidth, int newHeight);
 	// Call from GLFW scroll callback
+	// Params: double yffset
 	void OnScroll(double yffset);
 	// Handles camera inputs
+	// Params: GLFWwindow* window, float dt
 	void Inputs(GLFWwindow* window, float dt);
 	// Change camera modes
+	// Params: const glm::vec3& center
 	void ToggleCinema(const glm::vec3& center);
 	void UpdateWithMode(GLFWwindow* window, float dt);
 private:

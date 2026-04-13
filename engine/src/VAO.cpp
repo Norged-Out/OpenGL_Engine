@@ -1,3 +1,8 @@
+// ==================================================
+// Author: Priyansh Nayak
+// Description: Vertex array creation and binding helpers
+// ==================================================
+
 #include "engine/VAO.h"
 #include "engine/VBO.h"
 
